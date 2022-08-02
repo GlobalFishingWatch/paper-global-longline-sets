@@ -348,7 +348,7 @@ dfs2 = pd.read_gbq(q)
 # +
 # categorys of sets -- overlapping dawn, dusk, day, and night
 
-q ='''CREATE TEMPORARY FUNCTION
+q = """CREATE TEMPORARY FUNCTION
    
 North_Pacific() as ( "{'type': 'Polygon','coordinates': [[[113,23],[260.6,23],[260.6,66],[113,66],[113,23]]]}");
 
@@ -424,10 +424,10 @@ count(*) sets,
 category,
 from categorized
 group by region, category
-order by category'''
+order by category"""
 
-dfc= pd.read_gbq(q)
-dfc['category'] = dfc.category.apply(lambda x: x[1:])
+dfc = pd.read_gbq(q)
+dfc["category"] = dfc.category.apply(lambda x: x[1:])
 # -
 
 

@@ -452,17 +452,17 @@ change_y_mapping = {'Decreasing':-.8, 'Increasing':.8, 'Stable':0, 'Unknown':0}
 
 # +
 threatened_colors = {
-    "Critically endangered":'#9e0d00',#'#D54135' ,
+    "Critically endangered": "#9e0d00",  #'#D54135' ,
     "Endangered": "#E97343",
     "Vulnerable": "#FFDE03",
-    "Near threatened":"#CCE24F" ,
+    "Near threatened": "#CCE24F",
     "Least concern": "#72BE57",
 }
 
 # #7a85d6 -- old blue color
 
 bird_colors = {}
-iucn_statuses= {}
+iucn_statuses = {}
 
 for b in bird_status[1:]:
     b = b.split("\t")
