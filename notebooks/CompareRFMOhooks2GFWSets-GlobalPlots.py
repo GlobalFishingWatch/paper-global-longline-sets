@@ -6,7 +6,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.13.0
+#       jupytext_version: 1.12.0
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -131,7 +131,7 @@ vessel_info as (
     ssvid, 
     best.best_flag flag 
   from 
-    `world-fishing-827.gfw_research.vi_ssvid_v20210913` 
+    `gfw_research.vi_ssvid_v20210913` 
 ),
 
 
@@ -152,7 +152,7 @@ sets_grouped as (
     lon_index,lat_index, flag,year, month),
   
 hooks_table as (select * except(iso3), CASE iso3 WHEN 'TAI' THEN 'TWN' ELSE iso3 END As iso3 
-From `world-fishing-827.birdlife.rfmo_hooks_v20211206` )
+From `birdlife.rfmo_hooks_v20211206` )
 select 
   source,
   year,

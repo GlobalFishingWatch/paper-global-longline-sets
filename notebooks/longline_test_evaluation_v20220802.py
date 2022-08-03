@@ -6,12 +6,17 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.13.0
+#       jupytext_version: 1.12.0
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
 #     name: python3
 # ---
+
+# # Evaluate longline model
+# This notebook produces the precision and recall for the longline model, as described in Materials and Methods. With a test set of 100 days of longlining, where predicted sets overlap with ground truth sets, these are counted as true positives. 
+#
+# "Each predicted set within the selected days was checked for overlap with the ground truth sets. If there was overlap between a predicted set and a ground truth set, this was recorded as a true positive (TP). Predicted sets for which there were no overlapping ground truth sets were recorded as false positives (FP). Ground truth sets for which there were no overlapping predicted sets were recorded as false negatives (FN). `Recall, computed as TP/(TP+FN) was 90% and precision, computed as TP/(TP+FP), was 98%`. The precision and recall for each region were mostly consistent with these results. This result suggests that our model is conservative; we may actually be missing some from vessels, but the sets that are identified are likely done so correctly."
 
 import pandas as pd
 

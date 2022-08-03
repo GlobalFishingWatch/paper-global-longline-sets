@@ -6,12 +6,15 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.13.0
+#       jupytext_version: 1.12.0
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
 #     name: python3
 # ---
+
+# # Create night setting ratio table
+# This notebook produces the `night setting ratios for Table 1`. Ratios are computed for different time frames, fleets, and regions. The ratio can be either based on number of sets, or set duration
 
 import pandas as pd
 

@@ -7,7 +7,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.13.0
+#       jupytext_version: 1.12.0
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -16,9 +16,9 @@
 
 # # Compare Brazil Logbook Data with Predictions
 #
-# [describe this does]
+# This notebook matches predicted sets to sets reported in logbooks from Brazil. For matching sets, the difference in start time, end times, and duration is computed.
 #
-# This shows that Brazil logbook data predicts... [quote what we say in the paper]
+# Out of 855 sets in Brazil's logbook data, 169 were not identified by the model, suggesting that the model may be undercounted by the model. The start and end times of the remaining 686 sets, though, were accurately estimated, especially in the aggregate. The mean start time of the model was, on average, 2 minutes earlier than reported set time, and 8 minutes earlier than the reported end time. The standard deviation of the difference of start time and end time was 1.8 and 1.7 hours, respectively.
 
 # +
 import numpy as np
@@ -196,16 +196,12 @@ df_log = df_log[~df_log.set_end_timestamp_utc.isna()].copy()
 keep_ssvid = []
 for ssvid in df_log.ssvid.unique():
     df_log_s = df_log[df_log.ssvid == ssvid].copy().reset_index(drop=True)
-    print(ssvid)
     not_rounded = [
         not round(x, 3).is_integer() for x in df_log_s.set_duration_h.unique()
     ]
-    print(df_log_s.set_duration_h.unique())
-    print(not_rounded)
     if sum(not_rounded) > 1:
         keep_ssvid.append(ssvid)
-    df_log_s.set_duration_h.hist(bins=24)
-    plt.show()
+
 
 
 df_log = df_log[df_log.ssvid.isin(keep_ssvid)].copy().reset_index(drop=True)
