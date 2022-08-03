@@ -1,0 +1,1 @@
+Select * except(start_time, end_time), TIMESTAMP_ADD(start_time, INTERVAL {{SETS_TIME_ADJUST_START}} MINUTE) as start_time, TIMESTAMP_SUB(end_time, INTERVAL {{SETS_TIME_ADJUST_END}} MINUTE) AS end_time,  from `{{LONGLINE_EVENTS_TABLE}}*`

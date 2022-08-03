@@ -183,38 +183,7 @@ def plot_day_biv(
 
 # +
 q = """
-
-CREATE TEMPORARY FUNCTION
-  find_ROI(lat float64,lon float64) AS (
-    CASE
-      WHEN ST_CONTAINS(ST_GeogFromGeoJSON("{'type': 'Polygon','coordinates': [[[113,23],[260.6,23],[260.6,66],[113,66],[113,23]]]}",make_valid=>True), ST_GEOGPOINT(lon, lat)) THEN "North_Pacific"
-      WHEN ST_CONTAINS(ST_GeogFromGeoJSON("{'type': 'Polygon','coordinates': [[[150.0, -60.0], [150.0, -55.0], [141.0, -55.0], [141.0, -30.0], [150.0, -30.0], [160.0, -30.0], [240.0, -30.0], [240.0, -60.0], [150.0, -60.0]]]}",make_valid=>True), ST_GEOGPOINT(lon, lat)) THEN "South_Pacific"
-      WHEN ST_CONTAINS(ST_GeogFromGeoJSON("{'type': 'Polygon','coordinates': [[[-69.7, -23.0], [25, -23.0], [25, -62.3], [-69.7, -62.3], [-69.7, -23.0]]]}",make_valid=>True), ST_GEOGPOINT(lon, lat)) THEN "South_Atlantic"
-      WHEN ST_CONTAINS(ST_GeogFromGeoJSON("{'type': 'Polygon','coordinates': [[[25, -23.0], [118.0, -23.0], [118.0, -58.5], [25, -58.5], [25, -23.0]]]}",make_valid=>True), ST_GEOGPOINT(lon, lat)) THEN "South_Indian"                 
-    ELSE
-    "Other_Region"
-  END
-    ); 
-    
-CREATE TEMPORARY FUNCTION
-  find_region_CCSBT(lat float64,lon float64) AS (
-    CASE
-      WHEN ST_CONTAINS(ST_GeogFromGeoJSON("{'type': 'Polygon','coordinates': [[[95,-10],[130,-10],[130,-20],[95,-20],[95,-10]]]}",make_valid=>True), ST_GEOGPOINT(lon, lat)) THEN "1"
-      WHEN ST_CONTAINS(ST_GeogFromGeoJSON("{'type': 'Polygon','coordinates': [[[75,-20],[120,-20],[120,-35],[75,-35],[75,-20]]]}",make_valid=>True), ST_GEOGPOINT(lon, lat)) THEN "2"
-      WHEN ST_CONTAINS(ST_GeogFromGeoJSON("{'type': 'Polygon','coordinates': [[[115,-20],[140,-20],[140,-40],[115,-40],[115,-20]]]}",make_valid=>True), ST_GEOGPOINT(lon, lat)) THEN "3"
-      WHEN ST_CONTAINS(ST_GeogFromGeoJSON("{'type': 'Polygon','coordinates': [[[135,-30],[170,-30],[170,-40],[135,-40],[135,-30]]]}",make_valid=>True), ST_GEOGPOINT(lon, lat)) THEN "4"
-      WHEN ST_CONTAINS(ST_GeogFromGeoJSON("{'type': 'Polygon','coordinates': [[[165,-30],[190,-30],[190,-45],[165,-45],[165,-30]]]}",make_valid=>True), ST_GEOGPOINT(lon, lat)) THEN "5"
-      WHEN ST_CONTAINS(ST_GeogFromGeoJSON("{'type': 'Polygon','coordinates': [[[155,-40],[190,-40],[190,-65],[155,-65],[155,-40]]]}",make_valid=>True), ST_GEOGPOINT(lon, lat)) THEN "6"
-      WHEN ST_CONTAINS(ST_GeogFromGeoJSON("{'type': 'Polygon','coordinates': [[[115,-35],[140,-35],[140,-40],[160,-40],[160,-65],[115,-65],[115,-35]]]}",make_valid=>True), ST_GEOGPOINT(lon, lat)) THEN "7"
-      WHEN ST_CONTAINS(ST_GeogFromGeoJSON("{'type': 'Polygon','coordinates': [[[55,-35],[120,-35],[120,-65],[55,-65],[55,-35]]]}",make_valid=>True), ST_GEOGPOINT(lon, lat)) THEN "8"
-      WHEN ST_CONTAINS(ST_GeogFromGeoJSON("{'type': 'Polygon','coordinates': [[[-25,-35],[60,-35],[60,-65],[-25,-65],[-25,-35]]]}",make_valid=>True), ST_GEOGPOINT(lon, lat)) THEN "9"
-      WHEN ST_CONTAINS(ST_GeogFromGeoJSON("{'type': 'Polygon','coordinates': [[[-75,-35],[-20,-35],[-20,-65],[-75,-65],[-75,-35]]]}",make_valid=>True), ST_GEOGPOINT(lon, lat)) THEN "10"
-      WHEN ST_CONTAINS(ST_GeogFromGeoJSON("{'type': 'Polygon','coordinates': [[[15,-20],[80,-20],[80,-40],[15,-40],[15,-20]]]}",make_valid=>True), ST_GEOGPOINT(lon, lat)) THEN "14"
-      WHEN ST_CONTAINS(ST_GeogFromGeoJSON("{'type': 'Polygon','coordinates': [[[-15,-20],[20,-20],[20,-40],[-15,-40],[-15,-20]]]}",make_valid=>True), ST_GEOGPOINT(lon, lat)) THEN "15"
-    ELSE
-    "Other_Region"
-  END
-    );     
+     
 
 with sets_table as (
   select 
@@ -227,7 +196,7 @@ with sets_table as (
     ssvid, 
     cat2
   from 
-    `global-fishing-watch.paper_global_longline_sets.sets_5min_cat_v20220701`
+   `global-fishing-watch.paper_global_longline_sets.sets_5min_cat_v20220701`
   group by 
     ssvid, start_time, end_time, cat2
 )
@@ -243,7 +212,7 @@ df.isna().sum()
 
 # ## Limit years to 2017-2020 
 
-df = df[(df.start_time.dt.year>=2017) & (df.start_time.dt.year<=2020)].copy().reset_index(drop=True)
+df = df[(df.start_time.dt.year>=2017) & (df.end_time.dt.year<=2020)].copy().reset_index(drop=True)
 
 # +
 
@@ -265,7 +234,15 @@ df = (
 
 # ##
 
-df.set_duration.hist(bins=20)
+ax = df.set_duration.hist(bins=20)
+plt.suptitle('Sets Duration Histogram', x=0.5, y=1.0, ha='center', fontsize='xx-large')
+ax.set_ylabel("number of sets")
+ax.set_xlabel("hours")
+plt.savefig(figures_folder + '/Sets_Duration_Histogram.png', dpi=300, bbox_inches='tight')
+
+round(sum(df.set_duration>8)/len(df),2)
+
+round(sum(df.set_duration>10)/len(df),2)
 
 print("mean duration: ", round(df.set_duration.mean(),1))
 print("std: ", round(df.set_duration.std(),1))
@@ -286,7 +263,7 @@ plot_day_biv(df, scale=5)
 
 plot_day_biv(df, scale=5)
 
-len(df[df.start_time.dt.year>=2017])
+len(df)
 
 
 
@@ -298,8 +275,6 @@ print("Percentage mostly night sets",round(len(df[df.mostly_night])/len(df)*100,
 
 
 
-
-df[df.set_duration<3]
 
 
 

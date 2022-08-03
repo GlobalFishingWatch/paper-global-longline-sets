@@ -1,0 +1,298 @@
+CREATE TEMPORARY FUNCTION
+  reasonable_hours(hours float64) AS (
+    CASE
+      WHEN hours < 0 THEN hours + 24
+      WHEN hours >= 24 THEN hours - 24
+    ELSE
+    hours
+  END
+    );
+CREATE TEMPORARY FUNCTION
+  find_region_old(lat float64,lon float64) AS (
+    CASE
+      WHEN ((lon <= -100.0) or (lon >= 115.0)) and (lat between 23.0 and 70.0) THEN "North_Pacific"
+      WHEN ((lon <= -67.0) or (lon >= 141.0)) and (lat between -60.0 and -30.0) THEN "South_Pacific"
+      WHEN (lon between -73.4 and 27.2) and (lat between -60.0 and -25.0) THEN "South_Atlantic"
+      WHEN (lon between 28.9 and 129.5) and (lat between -60.0 and -25.0) THEN "South_Indian"                 
+    ELSE
+    "Other_Region"
+  END
+    );     
+CREATE TEMPORARY FUNCTION
+  find_region(lat float64,lon float64) AS (
+    CASE
+      WHEN ST_CONTAINS(ST_GeogFromGeoJSON("{{NORTH_PACIFIC}}",make_valid=>True), ST_GEOGPOINT(lon, lat)) THEN "North_Pacific"
+      WHEN ST_CONTAINS(ST_GeogFromGeoJSON("{{SOUTH_PACIFIC}}",make_valid=>True), ST_GEOGPOINT(lon, lat)) THEN "South_Pacific"
+      WHEN ST_CONTAINS(ST_GeogFromGeoJSON("{{SOUTH_ATLANTC}}",make_valid=>True), ST_GEOGPOINT(lon, lat)) THEN "South_Atlantic"
+      WHEN ST_CONTAINS(ST_GeogFromGeoJSON("{{SOUTH_INDIAN}}",make_valid=>True), ST_GEOGPOINT(lon, lat)) THEN "South_Indian"                 
+    ELSE
+    "Other_Region"
+  END
+    );  
+CREATE TEMPORARY FUNCTION
+  find_region_CCSBT(lat float64,lon float64) AS (
+    CASE
+      WHEN ST_CONTAINS(ST_GeogFromGeoJSON("{'type': 'Polygon','coordinates': [[[100,-10],[130,-10],[130,-20],[100,-20],[100,-10]]]}",make_valid=>True), ST_GEOGPOINT(lon, lat)) THEN "1"
+      WHEN ST_CONTAINS(ST_GeogFromGeoJSON("{'type': 'Polygon','coordinates': [[[80,-20],[120,-20],[120,-35],[80,-35],[80,-20]]]}",make_valid=>True), ST_GEOGPOINT(lon, lat)) THEN "2"
+      WHEN ST_CONTAINS(ST_GeogFromGeoJSON("{'type': 'Polygon','coordinates': [[[120,-20],[140,-20],[140,-35],[120,-35],[120,-20]]]}",make_valid=>True), ST_GEOGPOINT(lon, lat)) THEN "3"
+      WHEN ST_CONTAINS(ST_GeogFromGeoJSON("{'type': 'Polygon','coordinates': [[[140,-30],[170,-30],[170,-40],[140,-40],[140,-30]]]}",make_valid=>True), ST_GEOGPOINT(lon, lat)) THEN "4"
+      WHEN ST_CONTAINS(ST_GeogFromGeoJSON("{'type': 'Polygon','coordinates': [[[170,-30],[190,-30],[190,-40],[170,-40],[170,-30]]]}",make_valid=>True), ST_GEOGPOINT(lon, lat)) THEN "5"
+      WHEN ST_CONTAINS(ST_GeogFromGeoJSON("{'type': 'Polygon','coordinates': [[[160,-40],[190,-40],[190,-60],[160,-60],[160,-40]]]}",make_valid=>True), ST_GEOGPOINT(lon, lat)) THEN "6"
+      WHEN ST_CONTAINS(ST_GeogFromGeoJSON("{'type': 'Polygon','coordinates': [[[120,-35],[140,-35],[140,-40],[160,-40],[160,-60],[120,-60],[120,-35]]]}",make_valid=>True), ST_GEOGPOINT(lon, lat)) THEN "7"
+      WHEN ST_CONTAINS(ST_GeogFromGeoJSON("{'type': 'Polygon','coordinates': [[[60,-35],[120,-35],[120,-60],[60,-60],[60,-35]]]}",make_valid=>True), ST_GEOGPOINT(lon, lat)) THEN "8"
+      WHEN ST_CONTAINS(ST_GeogFromGeoJSON("{'type': 'Polygon','coordinates': [[[-20,-35],[60,-35],[60,-60],[-20,-60],[-20,-35]]]}",make_valid=>True), ST_GEOGPOINT(lon, lat)) THEN "9"
+      WHEN ST_CONTAINS(ST_GeogFromGeoJSON("{'type': 'Polygon','coordinates': [[[-70,-35],[-20,-35],[-20,-60],[-70,-60],[-70,-35]]]}",make_valid=>True), ST_GEOGPOINT(lon, lat)) THEN "10"
+      WHEN ST_CONTAINS(ST_GeogFromGeoJSON("{'type': 'Polygon','coordinates': [[[20,-20],[80,-20],[80,-35],[20,-35],[20,-20]]]}",make_valid=>True), ST_GEOGPOINT(lon, lat)) THEN "14"
+      WHEN ST_CONTAINS(ST_GeogFromGeoJSON("{'type': 'Polygon','coordinates': [[[-10,-20],[20,-20],[20,-35],[-10,-35],[-10,-20]]]}",make_valid=>True), ST_GEOGPOINT(lon, lat)) THEN "15"
+    ELSE
+    "Other_Region"
+  END
+    );     
+CREATE TEMPORARY FUNCTION
+  timestamp_to_hours(t timestamp) AS ( EXTRACT(hour
+    FROM
+      t) + EXTRACT(minute
+    FROM
+      t)/60 + EXTRACT(second
+    FROM
+      t)/3600 );
+CREATE TEMPORARY FUNCTION
+  timestamp_to_day(t timestamp) AS ( EXTRACT(dayofyear
+    FROM
+      t));
+CREATE TEMPORARY FUNCTION
+  local_TIMESTAMP(t timestamp,
+    add_minutes int64) AS ( TIMESTAMP_ADD(t, INTERVAL add_minutes MINUTE) );
+CREATE TEMPORARY FUNCTION
+  check_same_day(t1 timestamp,
+    t2 timestamp) AS (timestamp_to_day(t1)=timestamp_to_day(t2));
+CREATE TEMP FUNCTION
+  overlap_hours () AS (2);
+WITH
+    {% include "get_events.sql.j2" %}
+  get_WCPFC  AS (
+      SELECT ST_GEOGFROMTEXT({% include "WCPFC.sql.j2" %}) as WCPFC_wkt
+  ), 
+           
+    
+  ----------------------------------------
+  -- get only sets predicted as "setting"
+  ----------------------------------------
+  sets AS (
+      SELECT * FROM events
+      WHERE
+    label = 'setting'),
+  #
+  #
+
+  -----------------------------------------
+  -- join sets with start location
+  -- using mmsi, label, and start timestamp
+  -----------------------------------------
+  start_times AS (
+  SELECT
+    * EXCEPT (lat,
+      lon,
+      timestamp),
+    lat AS start_lat,
+    lon AS start_lon,
+  FROM
+    sets s
+  JOIN
+    predictions p
+  ON
+    (p.id = s.mmsi
+      AND p.timestamp = TIMESTAMP_ADD(s.start_time, INTERVAL 150 SECOND)
+      AND p.category = s.label) ),
+  #
+  #
+  -----------------------------------------
+  -- join sets with end location
+  -- using mmsi, label, and end timestamp
+  -----------------------------------------
+  end_times AS (
+  SELECT
+    mmsi,
+    set_id,
+    start_time,
+    end_time,
+    p.category,
+    score,
+    set_duration,
+    distance_from_shore_km,
+    start_lat,
+    start_lon,
+    lat AS end_lat,
+    lon AS end_lon,
+  FROM
+    start_times s
+  JOIN (
+    SELECT
+      id,
+      lat,
+      lon,
+      timestamp,
+      category
+    FROM
+      predictions) p
+  ON
+    (p.id = s.mmsi
+      AND p.timestamp = TIMESTAMP_SUB(s.end_time, INTERVAL 150 SECOND)
+      AND p.category = s.label) ),
+  #
+  #
+  -------------------------------
+  -- Order by mmsi and start time
+  -------------------------------
+  precat AS (
+  SELECT
+    *
+  FROM
+    end_times
+  ORDER BY
+    mmsi,
+    start_time),
+    
+  --------------------------------------
+  -- Join start with nautical time table
+  --------------------------------------    
+  start_nd AS (
+  SELECT
+    mmsi,
+    set_id,
+    set_duration,
+    category AS label,
+    start_time,
+    end_time,
+    start_lat,
+    start_lon,
+    distance_from_shore_km,  
+    nauticalDawn AS start_ndawn,
+    nauticalDusk AS start_ndusk
+  FROM
+    `{{NAUTICAL_TIME_RASTER_TABLE}}` a
+  JOIN
+    precat b
+  ON
+    a.lat = FLOOR(b.start_lat)
+    AND EXTRACT(dayofyear
+    FROM
+      start_time) = day_of_year ),
+  #
+  #
+
+
+  -------------------------------------------------
+  -- Convert to local times
+  -------------------------------------------------
+  settings AS (
+  SELECT
+    DISTINCT a.mmsi,
+    a.set_id,
+    a.label,
+    a.set_duration,
+    a.start_lon,
+    a.start_lat,
+    a.start_time,
+    a.end_time,
+    a.distance_from_shore_km,  
+    reasonable_hours(timestamp_to_hours(a.start_time) + (start_lon)/360*24) local_start_hours,
+    reasonable_hours(timestamp_to_hours(a.end_time) + (start_lon)/360*24) local_end_hours,
+    local_TIMESTAMP(a.start_time,
+      CAST(((start_lon)/360)*24*60 AS int64)) AS local_timestamp_start,
+    local_TIMESTAMP(a.end_time,
+      CAST(((start_lon)/360)*24*60 AS int64)) AS local_timestamp_end,
+    start_ndawn,
+    start_ndusk,
+
+  FROM
+    start_nd a),
+
+  --------------------------------------
+  --
+  --------------------------------------
+  tag_same_day AS (
+  SELECT
+    check_same_day(local_timestamp_end,
+      local_timestamp_start) AS same_day,
+    *
+  FROM
+    settings ),
+  #
+  #
+  grouped AS (
+  SELECT
+    *,
+    CASE
+    -----------------------------------------------------------------------------------
+    -- 1. Day Sets: Sets that occurred entirely between nautical dawn and nautical dusk
+    -----------------------------------------------------------------------------------
+      WHEN same_day AND (local_start_hours >= start_ndawn AND local_end_hours <= start_ndusk) THEN 1
+    -------------------------------------------------------------------------------------
+    -- 2. Night Sets: Sets that occured entirely between nautical dusk and nautical dawn.
+    -------------------------------------------------------------------------------------
+      WHEN ((NOT same_day)
+      AND ((local_start_hours > start_ndusk)
+        AND (local_end_hours < start_ndawn)))
+    OR ( same_day
+      AND ( (local_start_hours > start_ndusk)
+        OR (local_end_hours < start_ndawn)) ) THEN 2
+    -------------------------------------------------------------------------------------------------
+    -- 3. Sets Before Nautical Dusk: Sets that began before nautical dusk and extended into the night
+    -- This also captures sets that start before dusk and continue after dawn the next day
+    -------------------------------------------------------------------------------------------------
+      WHEN (same_day AND (local_start_hours <= start_ndusk AND local_end_hours > start_ndusk)) OR ((NOT same_day) AND (local_start_hours <= start_ndusk)) THEN 3
+    ---------------------------------------------------------------------------------------------
+    -- 4. Sets Over Nautical Dawn: Sets that began before nautical dawn and extended into the day
+    ---------------------------------------------------------------------------------------------
+      WHEN (same_day
+      AND (local_start_hours < start_ndawn
+        AND local_end_hours >= start_ndawn))
+    OR ((NOT same_day)
+      AND (local_end_hours >= start_ndawn)) THEN 4
+    ELSE
+    NULL
+  END
+    AS cat
+  FROM
+    tag_same_day ),
+  #
+  #
+  grouped_more AS (
+  SELECT
+    *,
+    CASE
+    ----------------------------------------------------------------------------------------------
+    -- 7. Sets Over Dusk <2h: Sets over nautical dusk, but starting less than 2 hours before dusk.
+    ----------------------------------------------------------------------------------------------
+      WHEN (cat = 3) AND ((start_ndusk - local_start_hours) <= overlap_hours()) THEN 7
+    ----------------------------------------------------------------------------------------------
+    -- 8. Sets Over Dusk >2h: Sets over nautical dusk, but starting more than 2 hours before dusk.
+    ----------------------------------------------------------------------------------------------
+      WHEN (cat = 3)
+    AND ((start_ndusk - local_start_hours) > overlap_hours()) THEN 8
+    --------------------------------------------------------------------------------------------
+    -- 5. Sets Over Dawn <2h: Sets over nautical dawn, but extending less than 2 hours into day.
+    --------------------------------------------------------------------------------------------
+      WHEN (cat = 4) AND ((local_end_hours - start_ndawn) <= overlap_hours()) THEN 5
+    --------------------------------------------------------------------------------------------
+    -- 6. Sets Over Dawn >2h: Sets over nautical dawn, but extending More than 2 hours into day.
+    --------------------------------------------------------------------------------------------
+      WHEN (cat = 4)
+    AND ((local_end_hours - start_ndawn) > overlap_hours()) THEN 6
+    ELSE
+    cat
+  END
+    AS cat2
+  FROM
+    GROUPED ),
+  vessel_info as (
+      SELECT DISTINCT ssvid, best.best_flag, best.best_length_m, best.best_tonnage_gt FROM `world-fishing-827.gfw_research.vi_ssvid_v20210706`
+  )    
+SELECT
+  *, find_region(start_lat, start_lon) as region, ST_CONTAINS((SELECT WCPFC_wkt FROM get_WCPFC), ST_GEOGPOINT(start_lon, start_lat)) as in_WCPFC, find_region_CCSBT(start_lat, start_lon) as region_CCSBT
+FROM
+  grouped_more g LEFT JOIN vessel_info f
+ON
+  (g.mmsi = f.ssvid)
+  

@@ -1,0 +1,96 @@
+
+
+CREATE TEMPORARY FUNCTION
+  timestamp_to_day(t timestamp) AS ( EXTRACT(dayofyear
+    FROM
+      t));
+      
+CREATE TEMPORARY FUNCTION
+  local_TIMESTAMP(t timestamp,
+    add_minutes int64) AS ( TIMESTAMP_ADD(t, INTERVAL add_minutes MINUTE) );
+
+CREATE TEMPORARY FUNCTION
+  check_same_day(t1 timestamp,
+    t2 timestamp) AS (timestamp_to_day(t1)=timestamp_to_day(t2));
+
+CREATE TEMP FUNCTION
+  overlap_hours () AS (2);
+
+CREATE TEMPORARY FUNCTION
+  timestamp_to_hours(t timestamp) AS ( EXTRACT(hour
+    FROM
+      t) + EXTRACT(minute
+    FROM
+      t)/60 + EXTRACT(second
+    FROM
+      t)/3600 );
+
+CREATE TEMPORARY FUNCTION
+  reasonable_hours(hours float64) AS (
+    CASE
+      WHEN hours < 0 THEN hours + 24
+      WHEN hours >= 24 THEN hours - 24
+    ELSE
+    hours
+  END
+    );
+
+
+with sets_and_local_time as (
+
+select 
+  -- seg_id,
+  timestamp, 
+  timestamp_to_day(timestamp) as day_of_year,
+  local_TIMESTAMP(timestamp,
+    CAST(((lon)/360)*24*60 AS int64)) AS local_timestamp,
+  ssvid,
+  lon,
+  lat,
+  interpolated_speed_knots, 
+  course,
+  cat,
+  cat2,
+  start_time,
+  end_time
+from 
+  gfw_research.pipe_v20201001_5min
+join
+  {{ sets_categorized_table }}
+using(ssvid)
+where 
+  date(_partitiontime) = "{{ the_date }}"
+  and timestamp between start_time and end_time
+),
+
+with_sunrise_sunset as (
+
+select 
+  a.lon lon, 
+  a.lat, 
+  * except(lon,lat, day_of_year),
+  reasonable_hours(timestamp_to_hours(local_timestamp)) as local_hour
+from 
+  sets_and_local_time a
+join
+  birdlife.nautical_time_raster_v20211117 b
+on 
+floor(a.lat) = b.lat
+and a.day_of_year = b.day_of_year),
+
+
+final_categorization as (
+select 
+  *, 
+  case when local_hour < nauticalDawn or local_hour > nauticalDusk then 'night'
+  when local_hour between nauticalDawn and sunrise then 'dawn'
+  when local_hour between sunrise and sunset then 'day'
+  when local_hour between sunset and nauticalDusk then 'dusk'
+  else 'error' end as day_category,
+  local_hour - nauticalDawn hours_after_nautical_dawn,
+  local_hour - sunrise hours_after_surnise
+from 
+  with_sunrise_sunset
+)
+
+select * from final_categorization

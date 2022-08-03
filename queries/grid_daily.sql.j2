@@ -1,0 +1,89 @@
+create temporary function one_over_cellsize() as ({{ one_over_cellsize }});
+
+with
+birdlife_day as (
+  select *,  CONCAT(ssvid, CAST(start_time AS string)) set_id
+   from {{ sets_5min_table }}
+  WHERE
+    DATE(_partitiontime) = "{{ the_date }}"
+  ),
+
+
+sets as (
+SELECT
+  st_simplify(ST_BUFFER(st_union_agg(st_geogpoint(lon,
+    lat)),30000),5000) set_shape,
+    day_category,
+set_id,
+FROM
+  birdlife_day
+  group by set_id,day_category
+),
+  
+w_bbox as (
+select 
+  set_id, day_category,
+  floor((bbox.xmin-1/one_over_cellsize())*one_over_cellsize())/one_over_cellsize() as min_lon,
+  floor((bbox.ymin-1/one_over_cellsize())*one_over_cellsize())/one_over_cellsize() as min_lat,
+  floor((bbox.xmax+1/one_over_cellsize())*one_over_cellsize())/one_over_cellsize() as max_lon,
+  floor((bbox.ymax+1/one_over_cellsize())*one_over_cellsize())/one_over_cellsize() as max_lat
+from
+( 
+  select 
+    ST_BOUNDINGBOX(set_shape) bbox,
+    set_id,
+    day_category
+  from 
+   sets)),
+
+lat_array AS(
+SELECT
+  set_id,
+  day_category,
+  lat + .5/one_over_cellsize() as lat  -- to get the middle of the cell
+FROM
+  w_bbox
+CROSS JOIN
+  UNNEST(GENERATE_ARRAY(FLOOR(min_lat*one_over_cellsize())/one_over_cellsize(), 
+  FLOOR(max_lat*one_over_cellsize())/one_over_cellsize(), 1/one_over_cellsize())) AS lat),
+  --
+  --
+lon_array AS (
+SELECT
+  set_id,
+  day_category,
+  lon + .5/one_over_cellsize() as lon -- to get the middle of the cell
+FROM
+  w_bbox
+CROSS JOIN
+  UNNEST(GENERATE_ARRAY(FLOOR(min_lon*one_over_cellsize())/one_over_cellsize(), 
+  FLOOR(max_lon*one_over_cellsize())/one_over_cellsize(), 1/one_over_cellsize())) AS lon), 
+ --
+ --
+id_lat_lon_array AS (
+SELECT
+  a.set_id set_id,
+  a.day_category,
+  a.lon lon,
+  b.lat lat
+FROM
+  lon_array a
+JOIN
+  lat_array b
+using(set_id, day_category))
+ --
+ --
+select 
+  floor(lat*one_over_cellsize()) lat_index,
+  floor(lon*one_over_cellsize()) lon_index,
+  set_id,
+  day_category
+from 
+  id_lat_lon_array
+join
+  sets
+using(set_id, day_category)
+where 
+  st_contains(set_shape,st_geogpoint(lon,lat))
+group by 
+  lat_index, lon_index, set_id, day_category

@@ -1,0 +1,79 @@
+  ----------------------------------------
+  -- Get events, compute set duration, and 
+  -- add a unique id for each set
+  ----------------------------------------
+  
+  offsetting AS (
+  SELECT
+    DISTINCT ssvid
+  FROM
+    `world-fishing-827.gfw_research.vi_ssvid_v20210913`
+  WHERE
+    activity.offsetting = TRUE
+    AND ssvid IS NOT NULL ),
+    
+  
+  events AS (
+  SELECT
+    * EXCEPT (id),
+    id AS mmsi,
+    ABS(TIMESTAMP_DIFF(end_time, start_time, minute))/60 AS set_duration,
+    ROW_NUMBER() OVER (ORDER BY id, start_time) AS set_id,
+  FROM
+    `{{LONGLINE_EVENTS_TABLE}}*` 
+     where id not in (select * from offsetting)
+    ),
+    #
+    #
+      
+  
+  ---------------------------------------------------------
+  -- Get predictions and scores for each timestamp
+  -- and cross join so that there is one row for each class
+  ---------------------------------------------------------
+  labels AS (
+  SELECT
+    * EXCEPT (scores)
+  FROM
+    `{{LONGLINE_POSITION_SCORE_TABLE}}*`
+  CROSS JOIN
+    UNNEST(scores) ),
+    #
+    #
+  ----------------------------------------
+  -- Get lat, lon, speed features 
+  ----------------------------------------  
+  locs AS (
+  SELECT
+    id,
+    lat,
+    lon,
+    speed_knots,
+    distance_from_shore_km,
+    elevation_m,
+    course_degrees,
+    timestamp
+  FROM
+    `{{LONGLINE_FEATURES_TABLE}}*` ),
+    #
+    #
+  ----------------------------------------
+  -- join prediction scores to lat and lon 
+  -- using mmsi and timestamp
+  ----------------------------------------  
+  predictions AS (
+  SELECT
+    *
+  FROM
+    labels 
+  JOIN
+    locs
+  USING
+    (id,
+      timestamp)
+  ORDER BY
+    id,
+    timestamp,
+    score ),
+    #
+    # 
