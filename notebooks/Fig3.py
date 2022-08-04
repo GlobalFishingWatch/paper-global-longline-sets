@@ -7,7 +7,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.13.0
+#       jupytext_version: 1.12.0
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -125,7 +125,7 @@ with fractions as (
     st_centroid(st_union_agg(st_geogpoint(lon,lat))) loc,
     sum(1/12) hours
   from       
-    `global-fishing-watch.paper_global_longline_sets.sets_5min_cat_v20220701` 
+    `birdlife.sets_5min_cat_v20220701` 
   where 
     date(_partitiontime) between "2017-01-01" and "2020-12-31"
     and abs(lat)<90
@@ -208,7 +208,7 @@ lon,
 start_time,
 local_hour - sunrise hours_after_sunrise 
 from        
-  `global-fishing-watch.paper_global_longline_sets.sets_5min_cat_v20220701` 
+  `birdlife.sets_5min_cat_v20220701` 
   --  where date(_partitiontime) between "2020-01-01" and "2020-12-31"
     )
     
@@ -282,7 +282,7 @@ select
    when (local_hour - sunrise) > 20 then (local_hour - sunrise) - 24
    else (local_hour - sunrise) end hours_after_sunrise 
 from  
-  `global-fishing-watch.paper_global_longline_sets.sets_5min_cat_v20220701`
+  `birdlife.sets_5min_cat_v20220701`
 --  where date(_partitiontime) between "2020-01-01" and "2020-12-31"
     ),
     
@@ -387,7 +387,7 @@ with fractions as (
     st_centroid(st_union_agg(st_geogpoint(lon,lat))) loc,
     sum(1/12) hours
   from      
-    `global-fishing-watch.paper_global_longline_sets.sets_5min_cat_v20220701` 
+    `birdlife.sets_5min_cat_v20220701` 
   where 
     date(_partitiontime) between "2017-01-01" and "2020-12-31"
     and abs(lat)<90
@@ -1113,6 +1113,8 @@ axs.format(grid=False, abcloc="ur")
 # plt.savefig("images/SetTimeRadialLegend2.png", dpi=300, bbox_inches="tight")
 
 # -
+
+
 
 
 

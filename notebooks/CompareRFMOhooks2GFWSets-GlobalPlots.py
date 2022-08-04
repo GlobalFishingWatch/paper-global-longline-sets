@@ -108,7 +108,7 @@ sets_table as (
     lon,
     ABS(TIMESTAMP_DIFF(end_time, start_time, minute))/60 AS set_duration, 
   from 
-   `global-fishing-watch.paper_global_longline_sets.sets_5min_cat_v20220701` 
+   `birdlife.sets_5min_cat_v20220701` 
   where 
     extract(year from _partitiontime) in(2017,2018, 2019)
 ),

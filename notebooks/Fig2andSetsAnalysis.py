@@ -6,7 +6,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.13.0
+#       jupytext_version: 1.12.0
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -196,7 +196,7 @@ with sets_table as (
     ssvid, 
     cat2
   from 
-   `global-fishing-watch.paper_global_longline_sets.sets_5min_cat_v20220701`
+   `birdlife.sets_5min_cat_v20220701`
   group by 
     ssvid, start_time, end_time, cat2
 )

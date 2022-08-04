@@ -6,7 +6,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.13.0
+#       jupytext_version: 1.12.0
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -82,7 +82,7 @@ regions_json["South_Pacific"] = shape(json.loads(South_Pacific.replace("\'", "\"
 q = '''select count(*) as num_sets from (
       (select distinct CONCAT(ssvid, CAST(start_time AS string)) as set_id 
     from 
-      `global-fishing-watch.paper_global_longline_sets.sets_5min_cat_v20220701` 
+      `birdlife.sets_5min_cat_v20220701` 
     where date(start_time) = "2020-05-01" )
 )'''
 pd.read_gbq(q)
@@ -93,7 +93,7 @@ q = '''
 with sets_starting_onday as (
       (select CONCAT(ssvid, CAST(start_time AS string)) as set_id 
     from 
-      `global-fishing-watch.paper_global_longline_sets.sets_5min_cat_v20220701` 
+      `birdlife.sets_5min_cat_v20220701` 
     where date(start_time) = "2020-05-01" )
 )
 
@@ -211,7 +211,7 @@ q = f'''
 select 
   ssvid, timestamp, lon, lat, day_category
 from 
- `global-fishing-watch.paper_global_longline_sets.sets_5min_cat_v20220701`
+ `birdlife.sets_5min_cat_v20220701`
 where date(_partitiontime) between "{start_date}" and "{end_date}"
     and date(start_time) = "{start_date}"
     and start_time > timestamp("{start_date}") 
@@ -294,7 +294,7 @@ from (
     select 
       distinct CONCAT(ssvid, CAST(start_time AS string)) as set_id 
     from 
-      `global-fishing-watch.paper_global_longline_sets.sets_5min_cat_v20220701`
+      `birdlife.sets_5min_cat_v20220701`
     where 
       date(_partitiontime) between "{start_date}" and "{end_date}"
       and date(start_time) = "{start_date}"
@@ -386,7 +386,7 @@ from (
     start_time,
     sum(if(day_category='night',1,0))/count(*) frac_night
   from   
-    `global-fishing-watch.paper_global_longline_sets.sets_5min_cat_v20220701` 
+    `birdlife.sets_5min_cat_v20220701` 
   where 
     _partitiontime between "2017-01-01"  and "2020-12-31"
     and timestamp_diff(timestamp, start_time, minute) > 60*0
@@ -408,7 +408,7 @@ from
     start_time,
     sum(if(day_category='night',1,0))/count(*) frac_night
     from 
-      `global-fishing-watch.paper_global_longline_sets.sets_5min_cat_v20220701` 
+      `birdlife.sets_5min_cat_v20220701` 
     where 
       _partitiontime between "2017-01-01"  and "2020-12-31"
       and timestamp_diff(timestamp, start_time, minute) > 60*1
@@ -432,7 +432,7 @@ from
       start_time,
       sum(if(day_category='night',1,0))/count(*) frac_night
     from     
-      `global-fishing-watch.paper_global_longline_sets.sets_5min_cat_v20220701` 
+      `birdlife.sets_5min_cat_v20220701` 
     where 
       _partitiontime between "2017-01-01"  and "2020-12-31"
       and timestamp_diff(timestamp, start_time, minute) > 60*2
