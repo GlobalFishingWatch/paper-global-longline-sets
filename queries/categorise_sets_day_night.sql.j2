@@ -287,7 +287,7 @@ WITH
   FROM
     GROUPED ),
   vessel_info as (
-      SELECT DISTINCT ssvid, best.best_flag, best.best_length_m, best.best_tonnage_gt FROM `world-fishing-827.gfw_research.vi_ssvid_v20210706`
+      SELECT DISTINCT ssvid, best.best_flag, best.best_length_m, best.best_tonnage_gt FROM `gfw_research.vi_ssvid_v20210706`
   )    
 SELECT
   *, find_region(start_lat, start_lon) as region, ST_CONTAINS((SELECT WCPFC_wkt FROM get_WCPFC), ST_GEOGPOINT(start_lon, start_lat)) as in_WCPFC, find_region_CCSBT(start_lat, start_lon) as region_CCSBT
