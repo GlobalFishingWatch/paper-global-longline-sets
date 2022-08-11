@@ -18,7 +18,7 @@
 #
 # This notebook matches predicted sets to sets reported in logbooks from Brazil. For matching sets, the difference in start time, end times, and duration is computed.
 #
-# Out of 855 sets in Brazil's logbook data, 169 were not identified by the model, suggesting that the model may be undercounted by the model. The start and end times of the remaining 686 sets, though, were accurately estimated, especially in the aggregate. The mean start time of the model was, on average, 2 minutes earlier than reported set time, and 8 minutes earlier than the reported end time. The standard deviation of the difference of start time and end time was 1.8 and 1.7 hours, respectively.
+# Materials and Methods: "Out of 855 sets in Brazil's logbook data, 169 were not identified by the model, suggesting that the model may be undercounted by the model. The start and end times of the remaining 686 sets, though, were accurately estimated, especially in the aggregate. The mean start time of the model was, on average, 2 minutes earlier than reported set time, and 8 minutes earlier than the reported end time. The standard deviation of the difference of start time and end time was 1.8 and 1.7 hours, respectively."
 
 # +
 import numpy as np

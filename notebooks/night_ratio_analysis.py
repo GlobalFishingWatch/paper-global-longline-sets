@@ -14,7 +14,7 @@
 # ---
 
 # # Create night setting ratio table
-# This notebook produces the `night setting ratios for Table 1`. Ratios are computed for different time frames, fleets, and regions. The ratio can be either based on number of sets, or set duration
+# This notebook produces the `night setting ratios for Table 1`. The ratios of sets happening at night are computed for different time frames, fleets, and regions. The ratio can be either based on number of sets, or set duration
 
 import pandas as pd
 

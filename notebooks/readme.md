@@ -1,6 +1,6 @@
 # Analyses for the paper, ...
 
-This folder contains notebooks that include the anslyses and figures for the paper.
+This folder contains notebooks that include the analyses and figures for the paper.
 
 
 Brazil_analysis-v20220718.py

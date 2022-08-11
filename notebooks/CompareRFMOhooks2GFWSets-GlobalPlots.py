@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # ---
 # jupyter:
 #   jupytext:
@@ -14,6 +15,10 @@
 # ---
 
 # # Compare RFMO Hooks with GFW Hooks
+#
+# This notebook produces the ratio of hooks to sets in `Results`. RFMO data on hooks was downloaded from each RFMO’s website, except for ICCAT, which was obtained from direct correspondence. 
+#
+# Results: "To determine if our dataset on longline sets was representative of all longline activity, we compared our longline set data from AIS with hooks reported to the tRFMOs. Fishing effort using longlines is typically reported by Flag States to tRFMOs as the aggregate number of hooks deployed in an area. Dividing the number of reported hooks reported between 2017 and 2019 by the number of detected longline sets yielded a ratio of ≈3,300 hooks per set. This ratio is higher than the actual number of hooks per set, on average, largely because we detect longlines set by vessels that transmit AIS, and an unknown number of vessels are not broadcasting AIS. Nonetheless, although the number of hooks per set varies by vessel and set, it typically ranges between 1000 and 4000 hooks per set (32–34). Given our ratio is in this range, it suggests that our model has likely captured a large proportion, if not the majority, of longline activity within our regions of interest. "
 
 # +
 import numpy as np
