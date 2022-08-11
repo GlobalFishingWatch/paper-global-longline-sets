@@ -18,6 +18,8 @@ Affiliations:
 
 [queries/](queries/): Directory containing queries for building BigQuery tables used in the analyses.
 
+[data/](data/): Directory containing data to support the creation of tables and figures.
+
 ## Data
 
 Data is available (and referenced in the notebooks in this repo) in the public BigQuery dataset `global-fishing-watch:paper_global_longline_sets`.
