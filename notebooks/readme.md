@@ -1,6 +1,6 @@
 # Analyses for the paper "Global prevalence of setting longlines at dawn highlights bycatch risk for threatened albatross".
 
-This folder contains notebooks that include the analyses and figures for the paper.
+This folder contains notebooks that include the analyses and figures for the paper. Jupytext is required to run these notebooks.
 
 
 **Brazil_analysis-v20220718.py**: This notebook investigates how sets predicted by the model match with sets recorded in logbooks.
