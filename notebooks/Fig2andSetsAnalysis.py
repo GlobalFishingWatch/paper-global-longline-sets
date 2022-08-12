@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # ---
 # jupyter:
 #   jupytext:
@@ -6,7 +7,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.12.0
+#       jupytext_version: 1.13.0
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -14,6 +15,14 @@
 # ---
 
 # # Analyse the longline sets data
+#
+# This notebook produces Figure 2, and values for number of vessels, number of sets, and set durations. Figure 2 shows the fraction of day and night sets on a global plot.
+#
+# Figure Caption: "Day setting dominates almost everywhere in the ocean. Blue areas indicate that sets happen mostly at night, and orange indicates sets occur mostly during the day. Bounding boxes represent regions with tRFMO regulations in the South Indian Ocean, North Pacific, South Pacific, and South Atlantic. "
+#
+# "For the period between January 2017 and December 2020, we classified about 1.45 million sets globally from just under 5,000 vessels. "
+#
+# "The average duration of a set in our data (6.5 ± 1.5 hours)"
 
 # +
 import numpy as np
@@ -208,7 +217,7 @@ Select * from sets_table
 df = pd.read_gbq(q)
 # -
 
-df.isna().sum()
+
 
 # ## Limit years to 2017-2020 
 
@@ -240,10 +249,6 @@ ax.set_ylabel("number of sets")
 ax.set_xlabel("hours")
 plt.savefig(figures_folder + '/Sets_Duration_Histogram.png', dpi=300, bbox_inches='tight')
 
-round(sum(df.set_duration>8)/len(df),2)
-
-round(sum(df.set_duration>10)/len(df),2)
-
 print("mean duration: ", round(df.set_duration.mean(),1))
 print("std: ", round(df.set_duration.std(),1))
 
@@ -260,10 +265,6 @@ len(df[df.start_time.dt.year<=2020])
 len(df.ssvid.unique())
 
 plot_day_biv(df, scale=5)
-
-plot_day_biv(df, scale=5)
-
-len(df)
 
 
 

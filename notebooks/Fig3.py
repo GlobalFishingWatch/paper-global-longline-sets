@@ -14,10 +14,21 @@
 #     name: python3
 # ---
 
-# # Make figure with:
-#  - time series of day and nigth sets
-#  - start time of sets
+# # Figure 3
+# This notebook produces `Figure 3` in `Results`. The figure shows that in regions with night setting recommendations, sets most commonly start a few hours before sunrise, and most overlap with dawn. The figure shows the seasonal variation in longline fishing, and the changes across years.
+# The figure is made with: 
+#  - time series of day and night sets
+#  - start and end time of sets
 #  - categories of sets (over dawn, over dusk, entirely night, entirely day)
+#  
+# Results: "In these regions with night setting recommendations, the most common time to start setting is a few hours earlier than the global average, with sets most commonly starting three to four hours before sunrise (`fig 3e, h, k, n`). Because most sets are longer than three hours, however, and because nautical dawn usually starts more than 40 minutes before sunrise, most of these sets overlap with the dawn hour. 
+#
+# The number of longline sets, globally, is extremely constant over the study period, with about 1,000 sets per day. In the northern and southern oceans, there is a strong seasonal variation (`Fig 3d, g, j, m`), which is especially strong in the southern oceans, where fishing is concentrated in the austral autumn/fall and winter. In the South Pacific, in 2020 there was a marked increase in night setting and number of sets that were entirely at night. Otherwise, the fraction of day and night setting is relatively unchanged between years.
+#
+# According to our data, setting over dawn is more common  in regions of albatross habitat than outside these regions. It appears that in these regions sets usually start a few hours earlier (`Fig 3 e,h,k,n versus 3b`), with most sets starting before sunrise and continuing into the dawn hour. The result is that although there is more setting at night in these regions, which should decrease bycatch risk, there is also more setting over dawn, which will likely increase it." 
+#  
+# Figure Caption: "Day setting and setting during dawn are common both globally and in each region. The number of sets by region that are mostly during the day, mostly at night, and entirely at night show seasonal patterns in each region (a, d, g, j, m). Globally (b), and in all regions except the North Pacific (e, h, k, n), the majority of the sets overlap with nautical dawn (hatched marks), with the most common sets being those that overlap with the dawn but are mostly during daytime hours. The most common times to start in every region (red bars in c, f, i, l, o) are the hours before sunrise, with most sets ending a few hours after sunrise (green bars).
+# "
 
 # +
 
