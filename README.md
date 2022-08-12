@@ -14,6 +14,8 @@ Affiliations:
 
 **Note**: The raw AIS data inputs to this analysis can not be made public due to data licensing restrictions and, as a result, some of the code cannot be run externally.
 
+[fishing_detection_model/](fishing_detection_model/): Directory containing the code for the model that identifies longline sets.
+
 [notebooks/](notebooks/): Directory containing notebooks with analyses and figures for the paper.
 
 [queries/](queries/): Directory containing queries for building BigQuery tables used in the analyses.
