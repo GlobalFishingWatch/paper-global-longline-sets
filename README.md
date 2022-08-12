@@ -1,5 +1,5 @@
 # paper-global-longline-sets
-[![DOI](https://zenodo.org/badge/{520293839}.svg)](https://zenodo.org/badge/latestdoi/{520293839})
+[![DOI](https://zenodo.org/badge/520293839.svg)](https://zenodo.org/badge/latestdoi/520293839)
 
 
 This repository contains code supporting the paper "Global prevalence of setting longlines at dawn highlights bycatch risk for threatened albatross." 
