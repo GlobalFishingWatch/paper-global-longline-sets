@@ -7,7 +7,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.12.0
+#       jupytext_version: 1.13.0
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -177,7 +177,14 @@ full outer join
 using
   (year, month, lat_index, lon_index, iso3)'''
 
-df = pd.read_gbq(q)
+# This query accesses a private BigQuery table. The results, though,
+# are saved in the csv file in the folder saved_dataframes
+# uncomment the below to run
+# df = pd.read_gbq(q)
+# df.to_csv("saved_dataframes/gridded_sets_rfmo.csv", index=False)
+# -
+
+df = pd.read_csv('saved_dataframes/gridded_sets_rfmo.csv')
 
 
 # + str(df_temp.start_time.dt.year.max())
@@ -550,7 +557,3 @@ plot_hooks_sets_month(df2, "Global", hooks_by_region, by_flag=False)
 top_flags = df2.iso3.value_counts()[0:5].index
 for iso3 in top_flags:
     plot_hooks_sets_month(df2, iso3, hooks_by_region)
-
-
-
-

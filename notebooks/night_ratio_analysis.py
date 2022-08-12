@@ -6,7 +6,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.12.0
+#       jupytext_version: 1.13.0
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -63,15 +63,15 @@ def perc_night(
 
 q = """
    
-SELECT * FROM `paper_global_longline_sets.longline_sets_categorised_v20220801` """
-df_0 = pd.read_gbq(q, project_id="global-fishing-watch")
+SELECT * FROM `global-fishing-watch.paper_global_longline_sets.longline_sets_categorised_v20220801` """
+df_0 = pd.read_gbq(q)
 
 # # Get predicted sets with 1 hour cut off either side
 
 q = """
    
-SELECT * FROM `paper_global_longline_sets.longline_sets_categorised60-60v20220801_` """
-df_60 = pd.read_gbq(q, project_id="global-fishing-watch")
+SELECT * FROM `global-fishing-watch.paper_global_longline_sets.longline_sets_categorised60-60v20220801_` """
+df_60 = pd.read_gbq(q)
 
 night_cats = [2, 5, 7]
 day_cats = [1, 6, 8]

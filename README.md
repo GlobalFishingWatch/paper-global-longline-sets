@@ -1,5 +1,5 @@
 # paper-global-longline-sets
-This repository contains code supporting the paper "Global prevalence of setting longlines at dawn highlights bycatch risk for threatened albatross". 
+This repository contains code supporting the paper "Global prevalence of setting longlines at dawn highlights bycatch risk for threatened albatross." 
 
 ## Overview
 One of the most effective ways to reduce seabird bycatch is for pelagic longliners to set their hooks entirely at night, when albatross are least active. The purpose of this repository is to archive the code used in the paper. The code produces estimates for global coverage of longline sets, overlap with albatross regions, ratio of sets happening at night in different regions, and an evaluation of the machine learning model.
@@ -23,3 +23,7 @@ Affiliations:
 ## Data
 
 Data is available (and referenced in the notebooks in this repo) in the public BigQuery dataset `global-fishing-watch:paper_global_longline_sets`.
+
+```python
+
+```
