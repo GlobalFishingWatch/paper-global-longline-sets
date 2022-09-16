@@ -7,11 +7,6 @@ This repository contains code supporting the paper "Global prevalence of setting
 ## Overview
 One of the most effective ways to reduce seabird bycatch is for pelagic longliners to set their hooks entirely at night, when albatross are least active. The purpose of this repository is to archive the code used in the paper. The code produces estimates for global coverage of longline sets, overlap with albatross regions, ratio of sets happening at night in different regions, and an evaluation of the machine learning model.
 
-**Authors**: David Kroodsma<sup>1</sup>, Joanna Turner<sup>1</sup>, Cian Luck<sup>1</sup>, Tim Hochberg<sup>1</sup>, Nathan Miller<sup>1</sup>, Philip Augustyn<sup>2</sup>, Stephanie Prince<sup>2</sup>
-
-Affiliations: 
-<sup>1</sup>Global Fishing Watch, Washington, DC 20036, USA 
-<sup>2</sup>BirdLife International Marine Programme, RSPB, The Lodge, Sandy, Bedfordshire, SG19 2DL, UK
 
 ## Code
 
