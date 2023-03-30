@@ -6,15 +6,15 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.13.0
+#       jupytext_version: 1.14.4
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
 #     name: python3
 # ---
 
-# # Create night setting ratio table
-# This notebook produces the `night setting ratios for Table 1`. The ratios of sets happening at night are computed for different time frames, fleets, and regions. The ratio can be either based on number of sets, or set duration
+# # Create night setting percentage table
+# This notebook produces the `night setting percentages for Table 1`. The percentage of sets happening at night are computed for different time frames, fleets, and regions. 
 
 import pandas as pd
 
@@ -118,7 +118,7 @@ print("std: ", round(df_0.set_duration.std(), 1))
 print("mean duration: ", round(df_60.set_duration.mean(), 1))
 print("std: ", round(df_60.set_duration.std(), 1))
 
-# # Compute night setting ratios for different regions and flags
+# # Compute night setting percentages for different regions and flags
 
 # rounding to decimal places
 rnd = 1
@@ -156,8 +156,8 @@ areas = {
     "NZL_2020_WCPFC30": {"flag": "NZL","year": 2020,"area": None,"inWCPFC": True,"lat_range": [-90,-30]}    
 }
 
-df_night_ratio = []
-measure_ratio = "sets"  # Either "sets" or "duration"
+df_night_perc = []
+measure_perc = "sets"  # Either "sets" or "duration"
 for key in list(areas.keys()):
     print(areas[key]["flag"])
     mostly_night, only_night, num_sets = perc_night(
@@ -167,7 +167,7 @@ for key in list(areas.keys()):
         region=areas[key]["area"],
         lat_range=areas[key]["lat_range"],
         inWCPFC=areas[key]["inWCPFC"],
-        mtype=measure_ratio,
+        mtype=measure_perc,
     )
     mostly_night1, only_night1, num_sets1 = perc_night(
         df_60,
@@ -176,13 +176,13 @@ for key in list(areas.keys()):
         region=areas[key]["area"],
         lat_range=areas[key]["lat_range"],
         inWCPFC=areas[key]["inWCPFC"],
-        mtype=measure_ratio,
+        mtype=measure_perc,
     )
 
     print(areas[key]["flag"], areas[key]["year"])
     print("mostly_night: ", round(mostly_night, rnd))
     print("only_night: ", round(only_night, rnd))
-    df_night_ratio.append(
+    df_night_perc.append(
         [
             areas[key]["flag"],
             areas[key]["year"],
@@ -198,12 +198,12 @@ for key in list(areas.keys()):
         ]
     )
 
-df_results = pd.DataFrame(df_night_ratio, columns=df_columns)
+df_results = pd.DataFrame(df_night_perc, columns=df_columns)
 
-print("ratio", measure_ratio)
+print(measure_perc)
 df_results.round(0)
 
-print("ratio", measure_ratio)
+print(measure_perc)
 df_results.round(1)
 
 

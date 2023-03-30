@@ -7,7 +7,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.13.0
+#       jupytext_version: 1.14.4
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -16,53 +16,21 @@
 
 # # Compare RFMO Hooks with GFW Hooks
 #
-# This notebook produces the ratio of hooks to sets in `Results`. RFMO data on hooks was downloaded from each RFMO’s website, except for ICCAT, which was obtained from direct correspondence. 
+# This notebook produces the ratio of hooks to sets in `Assessing model accuracy`. RFMO data on hooks was downloaded from each RFMO’s website, except for ICCAT, which was obtained from direct correspondence. 
 #
-# Results: "To determine if our dataset on longline sets was representative of all longline activity, we compared our longline set data from AIS with hooks reported to the tRFMOs. Fishing effort using longlines is typically reported by Flag States to tRFMOs as the aggregate number of hooks deployed in an area. Dividing the number of reported hooks reported between 2017 and 2019 by the number of detected longline sets yielded a ratio of ≈3,300 hooks per set. This ratio is higher than the actual number of hooks per set, on average, largely because we detect longlines set by vessels that transmit AIS, and an unknown number of vessels are not broadcasting AIS. Nonetheless, although the number of hooks per set varies by vessel and set, it typically ranges between 1000 and 4000 hooks per set (32–34). Given our ratio is in this range, it suggests that our model has likely captured a large proportion, if not the majority, of longline activity within our regions of interest. "
+# `Assessing model accuracy`: "To determine if our dataset on long- line sets was representative of all longline activity, we compared our longline set data from AIS with hooks reported to the tRFMOs. Fishing effort using longlines is typically reported by Flag States to tRFMOs as the aggregate number of hooks deployed in an area. Dividing the num- ber of reported hooks reported between 2017 and 2019 by the number of detected longline sets yielded a ratio of ≈3300 hooks per set. This ra- tio is higher than the actual number of hooks per set, on average, largely because we detect longlines set by vessels that transmit AIS, and an unknown number of vessels are not broadcasting AIS. Nonetheless, although the number of hooks per set varies by vessel and set, it typi- cally ranges between 1000 and 4000 hooks per set (Bigelow et al., 2006; Dunn et al., 2008; Nieblas et al., 2019). Given our ratio is in this range, it suggests that our model has likely captured a large proportion, if not the majority, of longline activity within our regions of interest. "
 
 # +
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib as mpl
 import pandas as pd
 
-# %matplotlib inline
 
-mpl.rcParams["axes.spines.right"] = False
-mpl.rcParams["axes.spines.top"] = False
-plt.rcParams["figure.facecolor"] = "white"
-plt.rcParams["axes.facecolor"] = "white"
-plt.rc("legend", frameon=False)
 
 # +
-import seaborn as sns
 
-sns.set_theme()
-import pyseas.maps as psm
-import pyseas.contrib as psc
-import pyseas.cm
-import matplotlib.colors as mpcolors
-from pyseas.maps import bivariate
 import sys
 
 sys.path.append("../data/")
-
-import Regions_json
-from shapely.geometry import shape, Point, Polygon
-
-regions_json = {}
-regions_json["South_Pacific"] = shape(
-    json.loads(Regions_json.South_Pacific.replace("'", '"'))
-)
-regions_json["North_Pacific"] = shape(
-    json.loads(Regions_json.North_Pacific.replace("'", '"'))
-)
-regions_json["South_Atlantic"] = shape(
-    json.loads(Regions_json.South_Atlantic.replace("'", '"'))
-)
-regions_json["South_Indian"] = shape(
-    json.loads(Regions_json.South_Indian.replace("'", '"'))
-)
 
 # -
 
@@ -186,179 +154,6 @@ using
 
 df = pd.read_csv('saved_dataframes/gridded_sets_rfmo.csv')
 
-
-# + str(df_temp.start_time.dt.year.max())
-def plot_hooks_sets(
-    df_temp,
-    scale=5,
-    region=None,
-    regions_json=regions_json,
-    proj="global.pacific_centered",
-    flag="All",
-    y_axis="sets",
-    max_y=5000,
-    min_y=500,
-    max_x=5.0,
-):
-    if region is not None:
-        df_temp = df_temp[(df_temp.region == region) | (df_temp.region_CCSBT == region)].reset_index(drop=True).copy()
-
-
-    grid_sets = psm.rasters.df2raster(
-        df_temp,
-        "lon_index",
-        "lat_index",
-        y_axis,
-        origin="upper",
-        xyscale=scale,
-        #         per_km2=True,
-    )
-    grid_hooks = psm.rasters.df2raster(
-        df_temp,
-        "lon_index",
-        "lat_index",
-        "hooks_diff",
-        origin="upper",
-        xyscale=scale,
-        #         per_km2=True,
-    )
-
-    cmap = bivariate.TransparencyBivariateColormap(pyseas.cm.misc.blue_orange)
-    with psm.context(psm.styles.dark):
-        fig, (ax0) = psm.create_maps(
-            1, 1, figsize=(10, 10), dpi=300, facecolor="white", projection=proj
-        )
-
-        norm1 = mpcolors.Normalize(vmin=0.0, vmax=max_x, clip=True)
-        norm2 = mpcolors.LogNorm(vmin=min_y, vmax=max_y, clip=True)
-        grid_sets[grid_sets < 0.001] = np.nan
-
-        bivariate.add_bivariate_raster(
-            grid_hooks, grid_sets, cmap, norm1, norm2, ax=ax0
-        )
-        psm.add_land(ax0)
-        cb_ax = bivariate.add_bivariate_colorbox(
-            cmap,
-            norm1,
-            norm2,
-            ylabel= y_axis,
-            xlabel="hooks/sets (1000)",
-            fontsize=8,
-            loc=(0.6, -0.17),
-            aspect_ratio=3.0,
-            xformat="{x:.2f}",
-            yformat="{x:.2f}",
-            fig=fig,
-            ax=ax0,
-        )
-        if region is None:
-            for key in regions_json.keys():
-                lons, lats = np.array(regions_json[key].exterior.coords.xy)
-                psm.add_plot(lons, lats, ax=ax0)
-        else:
-            if region in regions_json:
-                lons, lats = np.array(regions_json[region].exterior.coords.xy)
-                psm.add_plot(lons, lats, ax=ax0)
-        gl = pyseas.maps.add_gridlines()
-        title_string = str(region) if region else ""
-        title_string += "Longline sets and hooks: "
-        title_string += " "
-        title_string += flag if flag else ""
-        title_string += " "
-
-        ax0.set_title(title_string, pad=10, fontsize=20)
-
-        if (region is None) or (region == "Other_Region") or (region == "Other_Region_CCSBT"):
-            for key in regions_json.keys():
-                lons, lats = np.array(regions_json[key].exterior.coords.xy)
-                psm.add_plot(lons, lats)
-        else:
-            if region in regions_json:
-                lons, lats = np.array(regions_json[region].exterior.coords.xy)
-                psm.add_plot(lons, lats)
-
-
-# -
-def plot_hooks_sets_month(df_temp, iso3, hooks_per_set, by_flag=1):
-    years = np.sort(df_temp.year.unique())
-    month_names = [
-        "Jan",
-        "Feb",
-        "Mar",
-        "Apr",
-        "May",
-        "Jun",
-        "Jul",
-        "Aug",
-        "Sep",
-        "Oct",
-        "Nov",
-        "Dec",
-    ]
-
-    months = np.sort(df_temp.month.unique())
-    regions = np.sort(df_temp.region.unique())
-    fig, axs = plt.subplots(len(regions), 1, sharex=False, figsize=(25, 25))
-    fig.suptitle("Hooks vs Sets by Month: " + iso3, fontsize=22, y=0.92)
-
-    for r, region in enumerate(regions):
-        num_sets = []
-        num_hooks = []
-        x_months = []
-        for y, year in enumerate(years):
-
-            for month in months:
-                if (
-                    len(
-                        df_temp[
-                            (df_temp.region == region)
-                            & (df_temp.year == year)
-                            & (df_temp.month == month)
-                        ]
-                    )
-                    > 0
-                ):
-                    if month_names[month - 1] == month_names[0]:
-                        x_months.append(str(year) + " " + str(month_names[month - 1]))
-                    else:
-                        x_months.append(str(month_names[month - 1]))
-                    if(by_flag==1):
-                        iso3_cond = (df_temp.iso3 == iso3)
-
-                    else:
-                        iso3_cond = 1                                
-                    d2 = (
-                        df_temp[
-                            (df_temp.region == region)
-                            & iso3_cond
-                            & (df_temp.year == year)
-                            & (df_temp.month == month)
-                        ]
-                        .groupby(["lon_index", "lat_index"])
-                        .sum()
-                        .reset_index()
-                    )
-
-                    num_sets.append(d2.sets.sum())
-                    num_hooks.append(d2.hooks.sum() / hooks_per_set[region])
-
-        df = pd.DataFrame(
-            {"sets": num_sets, "hooks / " + str(hooks_per_set[region]): num_hooks},
-            index=x_months,
-        )
-        df.plot.line(rot=0, ax=axs[r], color=["red", "green"])
-        axs[r].set_title(region, fontsize=20)
-        axs[r].tick_params(labelrotation=90, axis="x")
-        axs[r].set_xticks(np.arange(0, len(x_months)))
-        axs[r].set_xticklabels(x_months, rotation=90, fontsize=16)
-        plt.ylabel("Number of sets", fontsize=16)
-        axs[r].legend()
-
-    fig.subplots_adjust(hspace=0.7)
-
-    plt.show()
-
-
 # ## Add ESP hooks for ICCAT
 
 csv_file = "../data/EffDis.csv"
@@ -469,16 +264,16 @@ for iso3 in top_flags:
     hooks_to_sets = 0
     if (d2.hooks.sum() > 0) & (d2.sets.sum() > 0):
         hooks_to_sets = round(d2.hooks.sum() / d2.sets.sum())
-    print(
-        iso3,
-        "Hooks",
-        d2["hooks"].sum(),
-        "Sets",
-        d2["sets"].sum(),
-        "hooks to sets: ",
-        hooks_to_sets,
-    )
-print(" ")
+#     print(
+#         iso3,
+#         "Hooks",
+#         d2["hooks"].sum(),
+#         "Sets",
+#         d2["sets"].sum(),
+#         "hooks to sets: ",
+#         hooks_to_sets,
+#     )
+# print(" ")
 for region in df.region.unique():
     print(region)
     d1 = (
@@ -501,59 +296,18 @@ for region in df.region.unique():
         hooks_to_sets = 0
         if (d2.hooks.sum() > 0) & (d2.sets.sum() > 0):
             hooks_to_sets = round(d2.hooks.sum() / d2.sets.sum())
-        print(
-            iso3,
-            "Hooks",
-            d2["hooks"].sum(),
-            "Sets",
-            d2["sets"].sum(),
-            "hooks to sets: ",
-            hooks_to_sets,
-        )
-    print("  ")
+#         print(
+#             iso3,
+#             "Hooks",
+#             d2["hooks"].sum(),
+#             "Sets",
+#             d2["sets"].sum(),
+#             "hooks to sets: ",
+#             hooks_to_sets,
+#         )
+#     print("  ")
 # -
 
 hooks_by_region
 
-d2 = df2.groupby(["lon_index", "lat_index"]).sum().reset_index()
-d2["hooks_diff"] = (d2.hooks / d2.sets) / 1000
-d2["hooks|sets"] = d2.sets
-d2.loc[d2.sets == 0, "hooks|sets"] = (
-    d2[d2.sets == 0].hooks / hooks_by_region["Global"]
-)
-plot_hooks_sets(
-    d2,
-    scale=0.2,
-    y_axis="hooks|sets",
-    max_y=5000,
-    min_y=50,
-    proj="global.atlantic_centered",
-    max_x=10,
-)
-# plt.savefig("Global_hooks_sets.png",dpi=300, bbox_inches='tight')
 
-top_flags = df2.iso3.value_counts()[0:5].index
-for iso3 in top_flags:
-    d2 = df2[(df2.iso3 == iso3)].groupby(["lon_index", "lat_index"]).sum().reset_index()
-    d2["hooks_diff"] = (d2.hooks / d2.sets) / 1000
-    d2["hooks|sets"] = d2.sets
-    d2.loc[d2.sets == 0, "hooks|sets"] = (
-        d2[d2.sets == 0].hooks / hooks_by_region["Global"]
-    )
-
-    plot_hooks_sets(
-        d2,
-        scale=0.2,
-        y_axis="hooks|sets",
-        max_y=5000,
-        min_y=10,        
-        proj="global.atlantic_centered",
-        flag=iso3,
-        max_x=10,
-    )
-
-plot_hooks_sets_month(df2, "Global", hooks_by_region, by_flag=False)
-
-top_flags = df2.iso3.value_counts()[0:5].index
-for iso3 in top_flags:
-    plot_hooks_sets_month(df2, iso3, hooks_by_region)

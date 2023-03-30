@@ -7,7 +7,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.13.0
+#       jupytext_version: 1.14.4
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -16,12 +16,12 @@
 
 # # Figure 1 and Estimates of Total Night Sets
 #
-# This notebook produces `Figure 1: Longline Sets that started on 202-05-01` and estimates for a given day and a year how much of the ocean is within 30km of a set.
+# This notebook produces `Figure 1: Longline Sets that started on 2020-05-01`, estimates for a given day and a year how much of the ocean is within 30km of a set, and fraction of sets entirely at night
 #
-# Results: "On any given day (one day shown in Fig 1a), there were around 1,000 sets in the global ocean by vessels broadcasting AIS. Albatross with radio tags have redirected towards fishing vessels up to 30km away, suggesting that they can detect fishing vessels at this distance, which is also the limit of their visual range (28, 29). Considering this range, we measured the area of the ocean within 30km of a set during the night, dawn, day, and dusk. We find that on a given day, over six million square km2, or about 1.5% of the ocean, is within 30km of a set. Over the course of a year, about 146 million km2, or over 40% of the ocean, is within this distance of a set, and 38%, or 137 million km2 is within this distance to a vessel setting during the day. 
+# Results: "On any given day (one day shown in Fig. 1a), there were around 1000 (997 ± 125) sets in the global ocean by vessels broadcasting AIS. Albatross with radio tags have redirected towards fishing vessels up to 30 km away, suggesting that they can detect fishing vessels at this distance, which is also the limit of their visual range (Collet et al., 2015, 2017). Considering this range, we measured the area of the ocean within 30 km of a setting longline during the night, dawn, day, and dusk. We find that on an aver- age day, about 5.3 million km2, or about 1.5 % of the ocean, is within 30 km of a set, and this number varied between 3.1 and 6.5 million km2 for different days in our four year time period. Over the course of a year, about 146 million km2, or over 40 % of the ocean, is within this distance of a set, and 38 %, or 137 million km2 is within this distance to a vessel setting during the day. 
 # "
 #
-# Figure caption: "(a) One day of longline sets in the global ocean. Bounding boxes represent regions with tRFMO regulations: South Indian Ocean, North Pacific, West and Central South Pacific, and South Atlantic. Shown are all longline sets (1,166 sets) that started on 1 May, 2020. (b) A zoomed in region (red box on a) shows 75 sets and the time of day of the different parts of the set (night, dawn, day – for these sets there was no overlap with dusk). In this region, virtually all sets started before dawn and continued into the day. The area within 30km of the set, the distance an albatross can detect a vessel, is shown in gray."
+# Figure caption: " (a) One day of longline sets in the global ocean. Bounding boxes represent regions with tRFMO regulations: South Indian Ocean, North Pacific, South Pacific, and South Atlantic. Shown are all longline sets (1166 sets) that started on 1 May 2020. (b) A zoomed in region (red box on a) shows 75 sets and the time of day of the different parts of the set (night, dawn, day — for these sets there was no overlap with dusk). In this region, virtually all sets started before dawn and continued into the day. The area within 30 km of the set, the distance an albatross can detect a vessel, is shown in gray."
 #
 # "because vessels often set in groups, as can be seen in `figure 1b`, where all the longlines appear to be set at the same time of day; setting in groups may reduce the chance of interference with one another. "
 

@@ -7,7 +7,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.13.0
+#       jupytext_version: 1.14.4
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -16,11 +16,11 @@
 
 # # How much do albatross species' ranges overlap with sets? And are these sets during the day or night?
 #
-# This notebook produces `Figure 4` in `Results`. The figure is made with: species areas, set times relative to dawn, set categories (over dawn, over dusk, entirely night, entirely day), and bird status from IUCN website. The figure shows the extent to which albatross ranges overlap with longline sets, and how this relates to time of day, and sunrise. 
+# This notebook produces `Figure 4` in `Results`. The figure shows the extent to which albatross ranges overlap with longline sets, and how this relates to time of day, and sunrise. The figure is made with: species areas, set times relative to dawn, set categories (over dawn, over dusk, entirely night, entirely day), and bird status from IUCN website. 
 #
-# Results: "These patterns of setting longlines are a threat to endangered and threatened albatrosses. In a given year, the fraction of an albatross’ range within 30km of a longline set varied from 7% of the range for the Southern royal albatross (Diomedea epomophora), whose range is farther south than most longline activity, to 65% for Amsterdam albatross (Diomedea amsterdamensis), whose range is in areas of intensive longlining in the southern Indian Ocean. In every species’ range, there were a few tens of thousands of sets per year between 2017 and 2020. For all but one of 11 species that have a range of greater than five million km2 and that are listed as Threatened, Endangered, or Critically Endangered by the IUCN, the majority of sets overlapped with dawn, and in none of the ranges was the fraction of night sets greater than 7%"
+# Results: "These patterns of setting longlines are a threat to endangered and threatened albatrosses. In a given year, the fraction of an albatross' range within 30 km of a longline set varied from 7 % of the range for the Southern royal albatross (Diomedea epomophora), whose range is farther south than most longline activity, to 65 % for Amsterdam alba- tross (Diomedea amsterdamensis), whose range is in areas of intensive longlining in the southern Indian Ocean. In every species' range, there were a few tens of thousands of sets per year between 2017 and 2020. For all but one of 14 species that have a range of greater than 5 million km2 and that are listed as Vulnerable, Endangered, or Critically En- dangered by the IUCN, the majority of sets overlapped with dawn, and in none of the ranges was the fraction of night sets >7 %"
 #
-# Figure caption: "The ranges (column 2) of threatened and endangered albatross species overlap extensively with longline sets. For all except one species (Phoebastria albatrus), the majority of sets overlap with dawn (hatched lines, column 3). The start and end time of sets in the species’ range (column 4) reveals the strong preference to start before dawn and finish in the day, overlapping dawn when albatrosses are most vulnerable. Column 1 shows relative bird size."
+# Figure caption: "The ranges (column 2) of vulnerable, endangered, or critically endangered albatross species overlap extensively with longline sets. For all except one species (Phoebastria albatrus), the majority of sets overlap with dawn (hatched lines, column 3). The start and end time of sets in the species' range (column 4) reveals the strong preference to start before dawn and finish in the day, overlapping dawn when albatrosses are most vulnerable. Column 1 shows relative bird size. Only species that have a range of greater than 5 million km2 are shown."
 
 # +
 import numpy as np
