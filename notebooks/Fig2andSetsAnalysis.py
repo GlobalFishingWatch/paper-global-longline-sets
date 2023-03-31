@@ -76,6 +76,7 @@ regions_json["South_Indian"] = shape(
 figures_folder = '../outputs/figures'
 
 
+# +
 def plot_positions_biv(
     df_n,
     df_d,
@@ -129,8 +130,8 @@ def plot_positions_biv(
             cmap,
             norm1,
             norm2,
-            xlabel="fraction of daytime fishing positions",
-            ylabel="total fishing positions",
+            xlabel="fraction of daytime setting positions",
+            ylabel="setting positions",
             fontsize=8,
             loc=(0.6, -0.17),
             aspect_ratio=3.0,
@@ -148,16 +149,18 @@ def plot_positions_biv(
                 lons, lats = np.array(regions_json[region].exterior.coords.xy)
                 psm.add_plot(lons, lats, ax=ax0)
 
-        gl = pyseas.maps.add_gridlines()
+#         gl = pyseas.maps.add_gridlines()
 
-        ax0.set_title(title_string, fontsize=16)
+        ax0.set_title(title_string, fontsize=14)
 
         plt.subplots_adjust(hspace=0.05)
         plt.tight_layout()
-        plt.savefig(figures_folder + '/positions_bivariate_light.png', dpi=300, bbox_inches='tight')
+        plt.savefig(figures_folder + '/positions_bivariate_light.png', dpi=600, bbox_inches='tight')
 
         plt.show()
 
+
+# -
 
 # %load_ext autoreload
 # %autoreload 2
@@ -252,7 +255,7 @@ df_grid = pd.read_gbq(q)
 
 df_daylight = df_grid[df_grid.day_category.isin(["day","dusk","dawn"])].copy().reset_index() 
 
-plot_positions_biv(df_daylight,df_grid, title_string="Longline fraction of daytime setting positions : 2017-2020")
+plot_positions_biv(df_daylight,df_grid, title_string="Longline setting day and night 2017-2020")
 
 # # Average pings per hour for predicted sets
 
