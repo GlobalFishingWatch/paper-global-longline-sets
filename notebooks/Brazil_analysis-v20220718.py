@@ -78,13 +78,15 @@ df_log = gbq(q)
 # ## Get predicted events
 
 # +
+# this queries birdlife.brazil_longline_events_20220802_,
+# which is not a public table
 q = f"""
 
 SELECT 
   *, 
   ABS(TIMESTAMP_DIFF(end_time, start_time, minute))/60 AS duration, 
 FROM 
-  `global-fishing-watch.paper_global_longline_sets.brazil_longline_events_20220802_*` 
+  `birdlife.brazil_longline_events_20220802_*` 
 Order by id, start_time"""
 
 df_preds = gbq(q)
@@ -264,7 +266,6 @@ print("true positives: ", len(df_ms))
 print("false positives: ", len(all_fps))
 print("false negatives: ", len(all_fns))
 
-print("accuracy: ", round(len(df_ms) / (len(all_gt)),2))
 recall = len(df_ms) / (len(df_ms) + len(all_fns))
 print("recall: ", round(recall, 2))
 
