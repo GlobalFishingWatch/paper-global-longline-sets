@@ -242,10 +242,6 @@ from
 dfs = pd.read_gbq(q)
 
 
-# -
-
-
-
 # +
 q = '''
 CREATE TEMPORARY FUNCTION
@@ -347,10 +343,6 @@ from
  '''
 
 dfs2 = pd.read_gbq(q)
-# -
-
-
-
 # +
 # categorys of sets -- overlapping dawn, dusk, day, and night
 
@@ -434,10 +426,6 @@ order by category"""
 
 dfc = pd.read_gbq(q)
 dfc["category"] = dfc.category.apply(lambda x: x[1:])
-# -
-
-
-
 # +
 fig, axs = pplt.subplots(ncols=3, 
                          nrows=6, 
@@ -469,6 +457,7 @@ for i, region in enumerate(
     ["all", "North_Pacific", "South_Atlantic", "South_Indian", "South_Pacific"]
 ):
     d = dfcd[dfcd.region == region]
+    d["date"] = pd.to_datetime(d["date"],utc=True)
     ax = axs[i * 3+3]
     #     ax.plot(d.date.values[7:-7],
     #                 d.sets.rolling(window=14).mean().values[7:-7],
@@ -909,6 +898,7 @@ for i, region in enumerate(
     ["all", "North_Pacific", "South_Atlantic", "South_Indian", "South_Pacific"]
 ):
     d = dfcd[dfcd.region == region]
+    d["date"] = pd.to_datetime(d["date"],utc=True)
     ax = axs[i * 3]
     #     ax.plot(d.date.values[7:-7],
     #                 d.sets.rolling(window=14).mean().values[7:-7],
@@ -1119,7 +1109,16 @@ axs.format(grid=False, abcloc="ur")
 # plt.savefig("images/SetTimeRadialLegend2.png", dpi=300, bbox_inches="tight")
 
 # -
+# # Fraction of night setting by region
 
+for region in dfcd.region.unique():
+    d = dfcd[(dfcd.region==region)]
+    print(region, f"{(d.entirely_night.sum()/d.sets.sum())*100:.1f}")
+
+# # Fraction of night setting in regions where night setting is recommended
+
+d = dfcd[(dfcd.region != 'all')&(dfcd.region!='Other_Region')]
+round(d.entirely_night.sum()/d.sets.sum() * 100,2)
 
 
 

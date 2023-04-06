@@ -146,10 +146,6 @@ where
  order by hours_after_sunrise'''
 
 dfh = pd.read_gbq(q)
-# -
-
-
-
 # +
 q = '''
  
@@ -228,10 +224,6 @@ from
  '''
 
 dfh = pd.read_gbq(q)
-# -
-
-
-
 # +
 # get set categories
 
@@ -873,11 +865,12 @@ ax.set_axis_off()
 # plt.savefig("birdmaps_thretened_radial.png",dpi=300, bbox_inches='tight')
 plt.show()
 # -
+# # Fraction of night sets in regions for threatened birds
 
-
-
-
-
+for bird_name in threatened_birds:
+    df_bird = dfc[dfc.bird_name==bird_name].copy()
+    perc = round(df_bird[df_bird.category=='5entirely night'].sets.values[0] / df_bird.sets.sum() * 100,1)
+    print(bird_name, perc)
 
 
 
