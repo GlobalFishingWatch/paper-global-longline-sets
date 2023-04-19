@@ -68,9 +68,6 @@ import warnings
 warnings.filterwarnings('ignore')
 
 # +
-# # !bq cp birdlife.albatross_ranges global-fishing-watch:paper_global_longline_sets.albatross_ranges
-
-# +
 # get outlines of species areas
 
 q = '''
@@ -79,7 +76,7 @@ select
   wkt_simple wkt,
   st_area(st_geogfromtext(wkt_simple, make_valid => True))/1e6/1e6 million_km2_range
 from 
-  `global-fishing-watch.paper_global_longline_sets.albatross_ranges` 
+  `birdlife.albatross_ranges` 
 where 
   seasonal =1 
 -- and 
@@ -107,7 +104,7 @@ with
 st_geogfromtext(wkt_simple, make_valid => True) as species_range,
 binomial
 from 
-  `global-fishing-watch.paper_global_longline_sets.albatross_ranges` 
+  `birdlife.albatross_ranges` 
 where 
   seasonal =1 
 order by binomial),
@@ -158,7 +155,7 @@ select
   st_geogfromtext(wkt_simple, make_valid => True) as species_range,
   binomial
 from 
-  `global-fishing-watch.paper_global_longline_sets.albatross_ranges` 
+  `birdlife.albatross_ranges` 
 where 
   seasonal =1 
 order by 
@@ -235,7 +232,7 @@ bird_range_table as
   st_geogfromtext(wkt_simple, make_valid => True) as species_range,
   binomial
 from 
-  `global-fishing-watch.paper_global_longline_sets.albatross_ranges`
+  `birdlife.albatross_ranges`
 where 
   seasonal =1 
 order by binomial),
@@ -308,7 +305,7 @@ q = ''' WITH
         make_valid => TRUE))/1e6/1e6 mil_km2_range,
     binomial AS bird_species
   FROM
-    `global-fishing-watch.paper_global_longline_sets.albatross_ranges`
+    `birdlife.albatross_ranges`
   WHERE
     seasonal =1
   ORDER BY
