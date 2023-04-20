@@ -155,7 +155,7 @@ def plot_positions_biv(
 
         plt.subplots_adjust(hspace=0.05)
         plt.tight_layout()
-        plt.savefig(figures_folder + '/positions_bivariate_light.png', dpi=600, bbox_inches='tight')
+        plt.savefig(figures_folder + '/positions_bivariate_light.png', dpi=400, bbox_inches='tight')
 
         plt.show()
 
@@ -253,9 +253,9 @@ group by day_category, lon_index, lat_index
 df_grid = pd.read_gbq(q)
 # -
 
-df_daylight = df_grid[df_grid.day_category.isin(["day","dusk","dawn"])].copy().reset_index() 
+df_daylight = df_grid[df_grid.day_category.isin(["day"])].copy().reset_index() 
 
-plot_positions_biv(df_daylight,df_grid, title_string="Longline setting day and night 2017-2020")
+plot_positions_biv(df_daylight,df_grid, title_string="Fraction of longline setting during daytime hours: 2017-2020")
 
 # # Average pings per hour for predicted sets
 
