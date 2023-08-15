@@ -7,7 +7,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.13.0
+#       jupytext_version: 1.14.4
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -18,7 +18,7 @@
 #
 # This notebook matches predicted sets to sets reported in logbooks from Brazil. For matching sets, the difference in start time, end times, and duration is computed.
 #
-# Materials and Methods: "Out of 855 sets in Brazil's logbook data, 169 were not identified by the model, suggesting that the model may be undercounted by the model. The start and end times of the remaining 686 sets, though, were accurately estimated, especially in the aggregate. The mean start time of the model was, on average, 2 minutes earlier than reported set time, and 8 minutes earlier than the reported end time. The standard deviation of the difference of start time and end time was 1.8 and 1.7 hours, respectively."
+# Assessing model accuracy: "out of 855 sets in logbook data, 169 were not identified by the model, giving a recall of 80 % (the same as accuracy), suggesting that sets may be undercounted by the model. The start and end times of the remaining 686 sets, though, were accurately estimated, especially in the aggregate. The mean start time of the model was, on average, 2 min earlier than reported set time, and 8 min earlier than the reported end time. The standard deviation of the difference of start time and end time was 1.8 and 1.7 h, respectively."
 
 # +
 import numpy as np
@@ -62,114 +62,34 @@ def gbq(q):
 
 # -
 
+# ## Get logged events 
+
+# +
+# this queries birdlife.brazil_logbook_test_events,
+# which is not a public table
+
+q = f"""
+SELECT * FROM `birdlife.brazil_logbook_test_events`
+"""
+
+df_log = gbq(q)
+# -
+
 # ## Get predicted events
 
 # +
+# this queries birdlife.brazil_longline_events_20220802_,
+# which is not a public table
 q = f"""
 
 SELECT 
   *, 
   ABS(TIMESTAMP_DIFF(end_time, start_time, minute))/60 AS duration, 
 FROM 
-  `global-fishing-watch.paper_global_longline_sets.brazil_longline_events_20220802_*` 
+  `birdlife.brazil_longline_events_20220802_*` 
 Order by id, start_time"""
 
 df_preds = gbq(q)
-# -
-
-# ## Get logged events 
-
-# +
-# this queries pipe_brazil_production_v20211126.messages_scored_ and bridlife.brazil_longline_logbook_2021,
-# which are not public dables
-
-q = f"""
-WITH
--- logbook data, start and end of each event: sets and hauls
-  logbook AS(
-  SELECT
-    *,
-    -- timestamp in logbook is in UTC -3, convert to gmt
-    DATETIME(set_in_timestamp, '+03') AS set_in_timestamp_utc,
-    DATETIME(set_end_timestamp, '+03') AS set_end_timestamp_utc,
-    DATETIME(haul_in_timestamp, '+03') AS haul_in_timestamp_utc,
-    DATETIME(haul_end_timestamp, '+03') AS haul_end_timestamp_utc
-  FROM
-    `birdlife.brazil_longline_logbook_2021`
-),
--- get a list of vms ssvid from each vessel present in logbook table
-ssvid_in_logbooks AS(
-    SELECT
-        DISTINCT ssvid,
-        UPPER((split(shipname, '/'))[safe_ordinal(1)]) as shipname,
-        n_shipname,
-        n_imo
-        FROM
-    `pipe_brazil_production_v20211126.messages_scored_*`
-  WHERE
-    _TABLE_SUFFIX between "20210101" AND "20220101"
-    AND
-    (UPPER(shipname) LIKE '%ALFA%' OR
-UPPER(shipname) LIKE '%ANA AMARAL I%' OR
-UPPER(shipname) LIKE '%AUSTRIA%' OR
-UPPER(shipname) LIKE '%AZTECA III%' OR
-UPPER(shipname) LIKE '%BRISA C%' OR
-UPPER(shipname) LIKE '%BRISA DO MAR II%' OR
-UPPER(shipname) LIKE '%DOM BERNARDO%' OR
-UPPER(shipname) LIKE '%DONA ILVA%' OR
-UPPER(shipname) LIKE '%EDSON MATHEUS I%' OR
-UPPER(shipname) LIKE '%ELIAS SEIF%' OR
-UPPER(shipname) LIKE '%ESTRELA DE KALY I%' OR
-UPPER(shipname) LIKE '%FILHO DA PROMESSA C%' OR
-UPPER(shipname) LIKE '%FLORIPA SL 03%' OR
-UPPER(shipname) LIKE '%FLORIPA SL 3%' OR
-UPPER(shipname) LIKE '%GUADALAJARA%' OR
-UPPER(shipname) LIKE '%IAN CARLOS%' OR
-UPPER(shipname) LIKE '%IAN CARLOS S%' OR
-UPPER(shipname) LIKE '%IBIZA%' OR
-UPPER(shipname) LIKE '%ISADORA I%' OR
-UPPER(shipname) LIKE '%IZADORA I%' OR
-UPPER(shipname) LIKE '%JOÃO VICTOR IV%' OR
-UPPER(shipname) LIKE 'JR LUCAS III%' OR
-UPPER(shipname) LIKE 'KADOSH II%' OR
-UPPER(shipname) LIKE 'KIYOMA%' OR
-UPPER(shipname) LIKE 'KOPESCA I%' OR
-UPPER(shipname) LIKE 'KOPESCA IV%' OR
-UPPER(shipname) LIKE 'LEAL SANTOS 7%' OR
-UPPER(shipname) LIKE 'MACEDO I%' OR
-UPPER(shipname) LIKE 'MARBELLA I%' OR
-UPPER(shipname) LIKE 'MARIA%' OR
-UPPER(shipname) LIKE 'MARIA CLARA%' OR
-UPPER(shipname) LIKE 'MARLIN II%' OR
-UPPER(shipname) LIKE 'MARTIM VAS%' OR
-UPPER(shipname) LIKE 'MARTIM VAZ%' OR
-UPPER(shipname) LIKE 'MERIDIANO 3%' OR
-UPPER(shipname) LIKE 'NATAL PESCA IX%' OR
-UPPER(shipname) LIKE 'NATAL PESCA VII%' OR
-UPPER(shipname) LIKE 'NETUNO S%' OR
-UPPER(shipname) LIKE 'RIO JAPURÁ%' OR
-UPPER(shipname) LIKE 'RIO POTENGI%' OR
-UPPER(shipname) LIKE 'RIO POTENGUI%' OR
-UPPER(shipname) LIKE 'SAFADI SEIF I%' OR
-UPPER(shipname) LIKE 'Y. ABE%' OR
-UPPER(shipname) LIKE 'YAMAYA III')
-ORDER BY shipname
-)
-
-SELECT 
-  a.*,
-  b.ssvid,
-  b.n_shipname,
-  b.n_imo
-FROM 
-  logbook as a
-LEFT JOIN 
-  ssvid_in_logbooks as b
-ON (a.shipname = b.shipname)
-
-"""
-
-df_log = gbq(q)
 # -
 
 # ## Clean log data
@@ -220,7 +140,7 @@ all_gt = []
 for ssvid in df_log.ssvid.unique():
 
     # Get vessel from log data
-    print(ssvid)
+#     print(ssvid)
     track_log = df_log[(df_log.ssvid.astype(str) == str(ssvid))].copy()
     track_log["set_id"] = [
         row["ssvid"] + str(row["start_unix"]) for _, row in track_log.iterrows()
@@ -314,13 +234,13 @@ df_ms = (
 
 # # Compute difference in time between log and predicted sets
 
-df_ms["diff_start"] = pd.to_datetime(df_ms["pred_start"]) - pd.to_datetime(
-    df_ms["log_start"]
-)
+df_ms["diff_start"] = df_ms["pred_start"] - df_ms["log_start"]
 df_ms["diff_start"] = df_ms["diff_start"].dt.total_seconds() / (60 * 60)
 df_ms["diff_end"] = df_ms["pred_end"] - df_ms["log_end"]
 df_ms["diff_end"] = df_ms["diff_end"].dt.total_seconds() / (60 * 60)
 df_ms["diff_dur"] = df_ms["pred_duration"] - df_ms["log_duration"]
+
+
 
 # ## Check predicted sets that match 2 log sets: the log sets overlap each other 
 #
@@ -339,11 +259,17 @@ all_gt = pd.concat(all_gt)
 all_fps = all_preds[~all_preds.set_id.isin(df_ms.set_id_pred)]
 all_fns = all_gt[~all_gt.set_id.isin(df_ms.set_id_log)]
 
-print(len(all_gt))
-print(len(all_preds))
-print("tp: ", len(df_ms))
-print("fp: ", len(all_fps))
-print("fn: ", len(all_fns))
+# +
+print("number of sets: ",len(all_gt))
+print("number of predictions", len(all_preds))
+print("true positives: ", len(df_ms))
+print("false positives: ", len(all_fps))
+print("false negatives: ", len(all_fns))
+
+recall = len(df_ms) / (len(df_ms) + len(all_fns))
+print("recall: ", round(recall, 2))
+
+# -
 
 
 # ## Difference in start and end time histogram

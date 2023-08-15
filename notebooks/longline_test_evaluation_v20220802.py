@@ -6,7 +6,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.13.0
+#       jupytext_version: 1.14.4
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -14,9 +14,9 @@
 # ---
 
 # # Evaluate longline model
-# This notebook produces the `precision` and `recall` for the `longline model`, as described in `Materials and Methods`. With a test set of 100 days of longlining, predicted sets that overlap with ground truth sets are counted as true positives. 
+# This notebook produces the `precision` and `recall` for the `longline model`, as described in `Materials and Methods`. 
 #
-# "Each predicted set within the selected days was checked for overlap with the ground truth sets. If there was overlap between a predicted set and a ground truth set, this was recorded as a true positive (TP). Predicted sets for which there were no overlapping ground truth sets were recorded as false positives (FP). Ground truth sets for which there were no overlapping predicted sets were recorded as false negatives (FN). `Recall, computed as TP/(TP+FN) was 90% and precision, computed as TP/(TP+FP), was 98%`. The precision and recall for each region were mostly consistent with these results. This result suggests that our model is conservative; we may actually be missing some from vessels, but the sets that are identified are likely done so correctly."
+# Assessing model accuracy: "Each predicted set within the selected days was checked for overlap with the ground truth sets. If there was overlap between a predicted set and a ground truth set, this was recorded as a true positive (TP). Pre- dicted sets for which there were no overlapping ground truth sets were recorded as false positives (FP). Ground truth sets for which there were no overlapping predicted sets were recorded as false negatives (FN). Recall, computed as TP / (TP + FN) was 90 % and precision, computed as TP / (TP + FP), was 98 %. The precision and recall for each region were mostly consistent with these results. This result suggests that our model is conservative; we may actually be missing some sets from ves- sels, but the sets that are identified are likely done so correctly."
 
 import pandas as pd
 
@@ -56,7 +56,7 @@ def convert_time(dates):
 
 # ## Load ground truth 
 
-df_seg_gt = pd.read_csv("longline_groundtruth_sets_v20220802.csv")
+df_seg_gt = pd.read_csv("../data/longline_groundtruth_sets_v20220802.csv")
 df_seg_gt["mmsi"] = df_seg_gt["mmsi"].astype(str)
 df_seg_gt.start_time = pd.to_datetime(df_seg_gt.start_time)
 df_seg_gt.end_time = pd.to_datetime(df_seg_gt.end_time)
@@ -67,7 +67,7 @@ ssvid_list = tuple(df_seg_gt.mmsi.unique())
 
 # ## Get list of days and mmsi that were selected randomly for testing
 
-test_sets = pd.read_csv("longline_test_days_v20220613.csv")
+test_sets = pd.read_csv("../data/longline_test_days_v20220613.csv")
 test_sets.mmsi = test_sets.mmsi.astype(str)
 
 len(test_sets.mmsi.unique())

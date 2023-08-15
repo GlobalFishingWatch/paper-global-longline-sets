@@ -7,7 +7,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.13.0
+#       jupytext_version: 1.14.4
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -16,11 +16,11 @@
 
 # # Analyse the longline sets data
 #
-# This notebook produces Figure 2, and values for number of vessels, number of sets, and set durations. Figure 2 shows the fraction of day and night sets on a global plot.
+# This notebook produces Figure 2, number of vessels, number of sets, and set durations. Figure 2 shows the fraction of day and night positions on a global plot.
 #
 # Figure Caption: "Day setting dominates almost everywhere in the ocean. Blue areas indicate that sets happen mostly at night, and orange indicates sets occur mostly during the day. Bounding boxes represent regions with tRFMO regulations in the South Indian Ocean, North Pacific, South Pacific, and South Atlantic. "
 #
-# "For the period between January 2017 and December 2020, we classified about 1.45 million sets globally from just under 5,000 vessels. "
+# "For the period between January 2017 and December 2020, we classified 1,451,159 sets globally from 4923 vessels. "
 #
 # "The average duration of a set in our data (6.5 ± 1.5 hours)"
 
@@ -29,6 +29,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import pandas as pd
+import cartopy
 
 # %matplotlib inline
 
@@ -75,53 +76,33 @@ regions_json["South_Indian"] = shape(
 figures_folder = '../outputs/figures'
 
 
-def plot_day_biv(
-    df_temp, scale=10, region=None, proj="global.pacific_centered", flag=None
+# +
+def plot_positions_biv(
+    df_n,
+    df_d,
+    scale=10,
+    region=None,
+    proj=cartopy.crs.EqualEarth(central_longitude=23-180),
+    flag=None,
+    title_string="fishing positions",
+    max_x=1.0,
+    max_y=5.0,    
 ):
-    if region is not None:
-        df_temp = df_temp[df_temp.region == region].reset_index(drop=True).copy()
-    if flag is not None:
-        df_temp = df_temp[df_temp["best_flag"] == flag].reset_index(drop=True).copy()
-    #     scale = 10
-    #     if('lon_index' in df_temp):
-    #         df_temp.drop('lon_index', inplace=True, axis=1)
-    #         df_temp.drop('lat_index', inplace=True, axis=1)
-    df_temp["lon_index"] = np.floor(df_temp["lon"] * scale)
-    df_temp["lat_index"] = np.floor(df_temp["lat"] * scale)
-    df_temp_gridded = (
-        df_temp[(df_temp.set_duration >= min_dur) & (df_temp.set_duration <= max_dur)][
-            ["lon_index", "lat_index"]
-        ]
-        .groupby(["lon_index", "lat_index"])
-        .size()
-        .reset_index(name="set_counts")
-    )
-
-    df_temp_gridded_day = (
-        df_temp[
-            (df_temp.set_duration >= min_dur)
-            & (df_temp.set_duration <= max_dur)
-            & (df_temp.cat2.isin([1, 6, 8]))
-        ][["lon_index", "lat_index"]]
-        .groupby(["lon_index", "lat_index"])
-        .size()
-        .reset_index(name="set_counts")
-    )
 
     grid_total = psm.rasters.df2raster(
-        df_temp_gridded,
+        df_d,
         "lon_index",
         "lat_index",
-        "set_counts",
+        "positions",
         origin="upper",
         xyscale=scale,
         per_km2=True,
     )
     grid_day = psm.rasters.df2raster(
-        df_temp_gridded_day,
+        df_n,
         "lon_index",
         "lat_index",
-        "set_counts",
+        "positions",
         origin="upper",
         xyscale=scale,
         per_km2=True,
@@ -133,10 +114,12 @@ def plot_day_biv(
 
     cmap = bivariate.TransparencyBivariateColormap(pyseas.cm.misc.blue_orange)
     with psm.context(psm.styles.light):
-        fig, (ax0) = psm.create_maps(1, 1, figsize=(10, 10), dpi=300, facecolor="white",projection=proj)
+        fig, (ax0) = psm.create_maps(
+            1, 1, figsize=(10, 10), dpi=300, facecolor="white", projection=proj
+        )
 
-        norm1 = mpcolors.Normalize(vmin=0.0, vmax=1, clip=True)
-        norm2 = mpcolors.LogNorm(vmin=0.001, vmax=0.1, clip=True)
+        norm1 = mpcolors.Normalize(vmin=0.0, vmax=max_x, clip=True)
+        norm2 = mpcolors.LogNorm(vmin=0.05, vmax=max_y, clip=True)
         grid_total[grid_total < 0.001] = np.nan
 
         bivariate.add_bivariate_raster(
@@ -147,8 +130,8 @@ def plot_day_biv(
             cmap,
             norm1,
             norm2,
-            xlabel="day sets\n(as fraction of total sets)",
-            ylabel="total sets\n(per $\mathregular{km^2}$)",
+            xlabel="fraction of daytime setting positions",
+            ylabel="setting positions",
             fontsize=8,
             loc=(0.6, -0.17),
             aspect_ratio=3.0,
@@ -166,29 +149,23 @@ def plot_day_biv(
                 lons, lats = np.array(regions_json[region].exterior.coords.xy)
                 psm.add_plot(lons, lats, ax=ax0)
 
-        gl = pyseas.maps.add_gridlines()
-        title_string = region if region else ""
-        title_string += "Longline sets day to night ratio: "
-        title_string += region if region else ""
-        title_string += " "
-        title_string += flag if flag else ""
-        title_string += " "
-        title_string += (
-            str(df_temp.start_time.dt.year.min())
-            + "-"
-            + str(df_temp.start_time.dt.year.max())
-        )
-        ax0.set_title(title_string, fontsize=16)
+#         gl = pyseas.maps.add_gridlines()
+
+        ax0.set_title(title_string, fontsize=14)
 
         plt.subplots_adjust(hspace=0.05)
         plt.tight_layout()
-        plt.savefig(figures_folder + '/sets_bivariate_day_vs_night_light.png', dpi=300, bbox_inches='tight')
+        plt.savefig(figures_folder + '/positions_bivariate_light.png', dpi=400, bbox_inches='tight')
 
         plt.show()
 
 
+# -
+
 # %load_ext autoreload
 # %autoreload 2
+
+# # Get sets
 
 # +
 q = """
@@ -216,9 +193,6 @@ Select * from sets_table
 
 df = pd.read_gbq(q)
 # -
-
-
-
 # ## Limit years to 2017-2020 
 
 df = df[(df.start_time.dt.year>=2017) & (df.end_time.dt.year<=2020)].copy().reset_index(drop=True)
@@ -231,8 +205,6 @@ df["mostly_day"] = df.cat2.isin(day_cats)
 df["mostly_night"] = df.cat2.isin(night_cats)
 # -
 
-df.set_duration.hist(bins=20)
-
 min_dur = 2
 max_dur = 15
 df = (
@@ -240,8 +212,6 @@ df = (
     .reset_index()
     .copy()
 )
-
-# ##
 
 ax = df.set_duration.hist(bins=20)
 plt.suptitle('Sets Duration Histogram', x=0.5, y=1.0, ha='center', fontsize='xx-large')
@@ -258,23 +228,107 @@ df.start_time.dt.year.value_counts().sort_index()
 
 # ## Total number of sets 
 
-len(df[df.start_time.dt.year<=2020])
+len(df)
 
 # ## Total number of vessels 
 
 len(df.ssvid.unique())
-
-plot_day_biv(df, scale=5)
-
-
 
 print("Number night sets",len(df[df.cat2==2]))
 print("Number mostly night sets",len(df[df.mostly_night]))
 print("Percentage night sets",round(len(df[df.cat2==2])/len(df)*100,1))
 print("Percentage mostly night sets",round(len(df[df.mostly_night])/len(df)*100,1))
 
+# # Plot global longline fishing positions (Fig 2)
+
+# +
+q = """
+select count(*) positions, floor(lon*10) lon_index, floor(lat*10) lat_index, day_category
+from `birdlife.sets_5min_cat` 
+where EXTRACT(YEAR from timestamp) >= 2017
+AND EXTRACT(YEAR from timestamp) <= 2020
+group by day_category, lon_index, lat_index 
+"""
+
+df_grid = pd.read_gbq(q)
+# -
+
+df_daylight = df_grid[df_grid.day_category.isin(["day"])].copy().reset_index() 
+
+plot_positions_biv(df_daylight,df_grid, title_string="Fraction of longline setting during daytime hours: 2017-2020")
+
+# # Average pings per hour for predicted sets
 
 
+# +
+#. This query references gfw_research.pipe_v20201001_fishing which is not a public table
+
+q = f"""
+WITH
+  ----------------------------------------
+  -- Get events, compute set duration, and
+  -- add a unique id for each set
+  ----------------------------------------
+
+  events AS (
+  SELECT
+    * EXCEPT (id),
+    id AS mmsi,
+    ABS(TIMESTAMP_DIFF(end_time, start_time, minute))/60 AS set_duration,
+    ROW_NUMBER() OVER (ORDER BY id, start_time) AS set_id,
+  FROM
+    `global-fishing-watch.paper_global_longline_sets.longline_events_smoothv20220801_*`
+  WHERE
+     label = "setting"),
+  
+  fishing_data as (
+    SELECT
+    ssvid, 
+    seg_id,
+    timestamp,
+    DATE(timestamp) AS date_ymd,
+    hours
+  FROM
+    `gfw_research.pipe_v20201001_fishing`
+  WHERE
+    (_partitiontime BETWEEN TIMESTAMP("2017-01-01")
+      AND TIMESTAMP("2021-01-01")) 
+
+  ),
+
+ joined_pipe AS (
+  SELECT
+    distinct
+    b.seg_id,
+    date_ymd,
+    COUNT(timestamp) AS pings_in_seg,
+    SUM(hours) AS sum_hours,
+  FROM
+    events a
+   JOIN
+    fishing_data b
+  ON
+    (mmsi = ssvid
+    AND timestamp BETWEEN start_time
+    AND end_time)
+    group by seg_id, date_ymd)
+
+SELECT
+  distinct
+  seg_id,
+  date_ymd,
+  pings_in_seg/sum_hours AS avg_pings_per_h
+FROM
+  joined_pipe
+WHERE
+  sum_hours > 0
+  AND pings_in_seg > 0"""
+
+df_seg = pd.read_gbq(q)
+# -
+
+print("average pings per hour: ",round(df_seg.avg_pings_per_h.mean()))
+print("median pings per hour: ",round(df_seg.avg_pings_per_h.median()))      
 
 
 

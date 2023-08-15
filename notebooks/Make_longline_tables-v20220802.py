@@ -6,7 +6,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.12.0
+#       jupytext_version: 1.14.4
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -17,7 +17,7 @@
 #
 # This notebook creates the table `global-fishing-watch.paper_global_longline_sets.longline_sets_categorised_v20220801`, each predicted longline set is assigned to one of 6 categories: `entirely a night`, `entirely during the day`, `Sets Over Dusk <2h`, `Sets Over Dusk >2h`, `Sets Over Dawn <2h`, `Sets Over Dawn >2h`. Based on the starting location of a set, each set is assigned to one of the regions of interest; a region in CCSBT (or "other" if not in CCSBT), and whether or not it is in WCPFC.
 #
-# This notebook also creates the table `global-fishing-watch.paper_global_longline_sets.longline_sets_categorised60-60_v20220801` which is the same as above but where 60 minutes has been cut off each end of each set
+# This notebook also creates the table `global-fishing-watch.paper_global_longline_sets.longline_sets_categorised60-60_v20220801` The same as above with 60 minutes cut off each end of a set.
 
 # +
 import matplotlib.pyplot as plt
